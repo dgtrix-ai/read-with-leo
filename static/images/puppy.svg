@@ -1,0 +1,9 @@
+<svg width="250" height="250" viewBox="0 0 250 250" xmlns="http://www.w3.org/2000/svg">
+  <!-- Simple puppy vector illustration -->
+  <circle cx="125" cy="125" r="120" fill="#D4A373"/>
+  <circle cx="90" cy="100" r="15" fill="#000"/>
+  <circle cx="160" cy="100" r="15" fill="#000"/>
+  <path d="M125 140 Q 125 160 140 165" stroke="#000" stroke-width="3" fill="none"/>
+  <path d="M80 70 Q 60 50 50 70" stroke="#D4A373" stroke-width="20" fill="none"/>
+  <path d="M170 70 Q 190 50 200 70" stroke="#D4A373" stroke-width="20" fill="none"/>
+</svg>

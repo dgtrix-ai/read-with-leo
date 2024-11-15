@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Read with Leo the Puppy! 🐕📚</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Previous content remains the same until video container -->
+    <div class="puppy-container">
+        <img src="/static/images/puppy.svg" alt="Adorable toy poodle puppy with golden-brown fur and expressive eyes" class="puppy-image">
+        <div class="video-container">
+            <!-- Update video elements to include fallback content -->
+            <video id="petVideo" src="/static/videos/petting.mp4" style="display: none">
+                <source src="/static/videos/petting.mp4" type="video/mp4">
+            </video>
+            <video id="playVideo" src="/static/videos/playing.mp4" style="display: none">
+                <source src="/static/videos/playing.mp4" type="video/mp4">
+            </video>
+            <video id="treatVideo" src="/static/videos/treating.mp4" style="display: none">
+                <source src="/static/videos/treating.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+    <!-- Rest of the content remains the same -->
+
+    <!-- Add video generator script before game.js -->
+    <script src="/static/js/video-generator.js"></script>
+    <script src="/static/js/game.js"></script>
+</body>
+</html>

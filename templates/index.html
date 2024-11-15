@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Read with Leo the Puppy! 🐕📚</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <h1>Play with Leo! 🐕✨</h1>
+
+    <div class="stats-container">
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-icon">❤️</span>
+                <span class="happiness-value">50%</span>
+            </div>
+            <div class="stat">
+                <span class="stat-icon">⭐</span>
+                <span class="energy-value">100%</span>
+            </div>
+        </div>
+
+        <div class="happiness-meter">
+            <div class="happiness-fill"></div>
+        </div>
+    </div>
+
+    <div class="puppy-container">
+        <img src="/static/images/puppy.svg" alt="Adorable toy poodle puppy with golden-brown fur and expressive eyes" class="puppy-image">
+        <div class="video-container">
+            <video id="petVideo" src="/static/videos/petting.mp4" style="display: none"></video>
+            <video id="playVideo" src="/static/videos/playing.mp4" style="display: none"></video>
+            <video id="treatVideo" src="/static/videos/treating.mp4" style="display: none"></video>
+        </div>
+    </div>
+
+    <div class="interaction-items">
+        <div class="interaction-item" data-type="pet">
+            <span>🤚</span> Pet Leo
+        </div>
+        <div class="interaction-item" data-type="play">
+            <span>🎾</span> Play Ball
+        </div>
+        <div class="interaction-item" data-type="treat">
+            <span>🦴</span> Give Treat
+        </div>
+    </div>
+
+    <div class="reading-container">
+        <h2 style="color: #ffd700; margin: 5px 0;">Spell with Leo! 📝</h2>
+        <div class="word-display">Ready to start!</div>
+        <div class="speech-container">
+            <div class="button-group">
+                <button class="mic-button" title="Click to speak">🎤</button>
+                <button class="speak-word-btn" title="Hear spelling again">🔊</button>
+            </div>
+            <div class="speech-status">Listen to the spelling and guess the word</div>
+        </div>
+        <input type="text" class="reading-input" placeholder="Type the word after hearing it spelled..." autocomplete="off">
+        <button class="next-word-btn">Next Word</button>
+        <div class="reward-container">
+            <p style="color: #ffd700; margin: 10px 0;">Great job! Choose your reward:</p>
+        </div>
+    </div>
+
+    <script src="/static/js/game.js"></script>
+</body>
+</html>
