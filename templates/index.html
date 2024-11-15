@@ -71,7 +71,22 @@
         </div>
     </div>
 
+    <!-- Add video generator script before main script -->
+    <script src="/static/js/video-generator.js"></script>
+    
     <script>
+    // Add error event listeners to video elements
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.video-container video').forEach(video => {
+            video.addEventListener('error', (e) => {
+                console.log('Video error:', e);
+                video.style.opacity = '0';
+                video.style.display = 'none';
+                puppy.style.opacity = '1';
+            });
+        });
+    });
+
     let happiness = 50;
     let energy = 100;
     const puppy = document.querySelector('.puppy-image');
@@ -153,13 +168,18 @@
             video.style.display = 'block';
             requestAnimationFrame(() => {
                 video.style.opacity = '1';
-                video.play().catch(error => {
-                    console.log('Video playback failed:', error);
-                    // Fallback to showing the puppy image
-                    video.style.opacity = '0';
-                    video.style.display = 'none';
-                    puppy.style.opacity = '1';
-                });
+                video.play()
+                    .then(() => {
+                        // Video started playing successfully
+                    })
+                    .catch(error => {
+                        console.log('Video playback failed:', error);
+                        video.style.opacity = '0';
+                        video.style.display = 'none';
+                        puppy.style.opacity = '1';
+                        // Trigger the canvas animation fallback
+                        video.dispatchEvent(new Event('error'));
+                    });
             });
             
             video.onended = function() {
@@ -336,8 +356,5 @@
     // Initialize first word with speech
     updateWord();
     </script>
-
-    <!-- Add video generator script -->
-    <script src="/static/js/video-generator.js"></script>
 </body>
 </html>
