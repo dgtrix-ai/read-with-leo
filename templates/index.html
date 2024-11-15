@@ -27,9 +27,18 @@
     <div class="puppy-container">
         <img src="/static/images/puppy.svg" alt="Adorable toy poodle puppy with golden-brown fur and expressive eyes" class="puppy-image">
         <div class="video-container">
-            <video id="petVideo" src="/static/videos/petting.mp4" style="display: none"></video>
-            <video id="playVideo" src="/static/videos/playing.mp4" style="display: none"></video>
-            <video id="treatVideo" src="/static/videos/treating.mp4" style="display: none"></video>
+            <video id="petVideo" style="display: none">
+                <source src="/static/videos/petting.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <video id="playVideo" style="display: none">
+                <source src="/static/videos/playing.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <video id="treatVideo" style="display: none">
+                <source src="/static/videos/treating.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
         </div>
     </div>
 
@@ -144,7 +153,13 @@
             video.style.display = 'block';
             requestAnimationFrame(() => {
                 video.style.opacity = '1';
-                video.play();
+                video.play().catch(error => {
+                    console.log('Video playback failed:', error);
+                    // Fallback to showing the puppy image
+                    video.style.opacity = '0';
+                    video.style.display = 'none';
+                    puppy.style.opacity = '1';
+                });
             });
             
             video.onended = function() {
