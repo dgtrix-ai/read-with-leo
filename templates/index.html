@@ -62,6 +62,267 @@
         </div>
     </div>
 
-    <script src="/static/js/game.js"></script>
+    <script>
+    let happiness = 50;
+    let energy = 100;
+    const puppy = document.querySelector('.puppy-image');
+    const happinessFill = document.querySelector('.happiness-fill');
+    const happinessValue = document.querySelector('.happiness-value');
+    const energyValue = document.querySelector('.energy-value');
+    const interactionItems = document.querySelector('.interaction-items');
+
+    document.querySelectorAll('.interaction-item').forEach(item => {
+        item.addEventListener('click', interactWithLeo);
+    });
+
+    function updateStats() {
+        happiness = Math.min(100, Math.max(0, happiness));
+        energy = Math.min(100, Math.max(0, energy));
+        
+        happinessFill.style.width = `${happiness}%`;
+        happinessValue.textContent = `${Math.round(happiness)}%`;
+        energyValue.textContent = `${Math.round(energy)}%`;
+    }
+
+    function createParticles(x, y, type) {
+        const particles = {
+            'pet': ['💖', '✨', '💫'],
+            'play': ['🎾', '⚡', '🌟'],
+            'treat': ['🦴', '❤️', '🍖']
+        };
+        
+        const emojis = particles[type] || particles.pet;
+        
+        for (let i = 0; i < 6; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            particle.style.left = `${x + (Math.random() - 0.5) * 100}px`;
+            particle.style.top = `${y + (Math.random() - 0.5) * 100}px`;
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), 1500);
+        }
+    }
+
+    function interactWithLeo(e) {
+        const rect = puppy.getBoundingClientRect();
+        const type = e.currentTarget.dataset.type;
+        
+        createParticles(rect.left + rect.width/2, rect.top + rect.height/2, type);
+        
+        puppy.style.opacity = '0';
+        
+        document.querySelectorAll('.video-container video').forEach(v => {
+            v.style.opacity = '0';
+            v.style.display = 'none';
+            v.pause();
+            v.currentTime = 0;
+        });
+        
+        let video;
+        switch(type) {
+            case 'pet':
+                video = document.getElementById('petVideo');
+                happiness += 5;
+                energy += 2;
+                break;
+            case 'play':
+                if (energy >= 10) {
+                    video = document.getElementById('playVideo');
+                    happiness += 15;
+                    energy -= 10;
+                }
+                break;
+            case 'treat':
+                video = document.getElementById('treatVideo');
+                happiness += 10;
+                energy += 15;
+                break;
+        }
+        
+        if (video) {
+            video.style.display = 'block';
+            requestAnimationFrame(() => {
+                video.style.opacity = '1';
+                video.play();
+            });
+            
+            video.onended = function() {
+                video.style.opacity = '0';
+                setTimeout(() => {
+                    video.style.display = 'none';
+                    requestAnimationFrame(() => {
+                        puppy.style.opacity = '1';
+                    });
+                }, 300);
+            };
+        } else {
+            requestAnimationFrame(() => {
+                puppy.style.opacity = '1';
+            });
+        }
+        
+        updateStats();
+        interactionItems.style.display = 'none';
+        readingInput.value = '';
+        updateWord();
+    }
+
+    const words = ['puppy', 'play', 'happy', 'friend', 'love', 'bark', 'fetch', 'treat', 'walk', 'good'];
+    let currentWord = '';
+    const wordDisplay = document.querySelector('.word-display');
+    const readingInput = document.querySelector('.reading-input');
+    const nextWordBtn = document.querySelector('.next-word-btn');
+    const rewardContainer = document.querySelector('.reward-container');
+
+    function getRandomWord() {
+        return words[Math.floor(Math.random() * words.length)];
+    }
+
+    function spellOutWord() {
+        let currentIndex = 0;
+        const letters = currentWord.split('');
+        
+        if (!wordDisplay.textContent.includes(letters.join(' '))) {
+            wordDisplay.textContent = ''; 
+        }
+        
+        const spellInterval = setInterval(() => {
+            if (currentIndex < letters.length) {
+                if (!wordDisplay.textContent.includes(letters.join(' '))) {
+                    wordDisplay.textContent += letters[currentIndex] + ' ';
+                }
+                speakWord(letters[currentIndex]); 
+                currentIndex++;
+            } else {
+                clearInterval(spellInterval);
+                readingInput.focus();
+            }
+        }, 1000); 
+    }
+
+    function updateWord() {
+        currentWord = getRandomWord();
+        readingInput.value = '';
+        rewardContainer.style.display = 'none';
+        interactionItems.style.display = 'none';
+        
+        wordDisplay.textContent = 'Get ready...';
+        setTimeout(() => {
+            speakWord("Here's your word:");
+            setTimeout(spellOutWord, 1000);
+        }, 1000);
+    }
+
+    function checkWord() {
+        if (readingInput.value.toLowerCase().trim() === currentWord.toLowerCase()) {
+            wordDisplay.textContent = '🌟 Correct! 🌟';
+            rewardContainer.style.display = 'block';
+            interactionItems.style.display = 'flex'; 
+            speakWord("Great job! Choose your reward!");
+            
+            document.querySelectorAll('.interaction-item').forEach(item => {
+                if (!item.hasEventListener) {
+                    item.addEventListener('click', interactWithLeo);
+                    item.hasEventListener = true;
+                }
+            });
+            
+            createParticles(
+                puppy.getBoundingClientRect().left + puppy.getBoundingClientRect().width/2,
+                puppy.getBoundingClientRect().top + puppy.getBoundingClientRect().height/2,
+                'pet'
+            );
+            
+        } else if (readingInput.value.length >= currentWord.length) {
+            wordDisplay.textContent = '❌ Try again!';
+            rewardContainer.style.display = 'none';
+            interactionItems.style.display = 'none';
+            speakWord("Try again!");
+        }
+    }
+
+    readingInput.addEventListener('input', () => {
+        checkWord();
+    });
+
+    nextWordBtn.addEventListener('click', updateWord);
+
+    // Speech Recognition Setup
+    const micButton = document.querySelector('.mic-button');
+    const speechStatus = document.querySelector('.speech-status');
+    const speakWordBtn = document.querySelector('.speak-word-btn');
+
+    let recognition = null;
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+            micButton.classList.add('listening');
+            speechStatus.textContent = 'Listening...';
+        };
+
+        recognition.onend = () => {
+            micButton.classList.remove('listening');
+            speechStatus.textContent = 'Listen to the spelling and guess the word';
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.toLowerCase().trim();
+            readingInput.value = transcript;
+            if (transcript === currentWord.toLowerCase()) {
+                checkWord();
+            } else {
+                wordDisplay.textContent = '❌ Try again!';
+                rewardContainer.style.display = 'none';
+                interactionItems.style.display = 'none';
+                speakWord("Try again!");
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            speechStatus.textContent = 'Error occurred. Please try again.';
+            micButton.classList.remove('listening');
+        };
+    }
+
+    // Text-to-Speech Setup
+    const speechSynthesis = window.speechSynthesis;
+
+    function speakWord(word) {
+        if (speechSynthesis) {
+            speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.rate = 0.8; 
+            utterance.pitch = 1;
+            speechSynthesis.speak(utterance);
+        }
+    }
+
+    // Event Listeners for Speech Features
+    micButton.addEventListener('click', () => {
+        if (recognition) {
+            recognition.start();
+        } else {
+            alert('Speech recognition is not supported in your browser.');
+        }
+    });
+
+    speakWordBtn.addEventListener('click', () => {
+        speechSynthesis.cancel();
+        spellOutWord();
+    });
+
+    // Initialize first word with speech
+    updateWord();
+    </script>
+
+    <!-- Add video generator script -->
+    <script src="/static/js/video-generator.js"></script>
 </body>
 </html>
