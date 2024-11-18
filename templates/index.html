@@ -25,11 +25,11 @@
     </div>
 
     <div class="puppy-container">
-        <img src="/a/5384e0ad-842a-46e6-afa0-ae6492391379" alt="Adorable toy poodle puppy with golden-brown fur and expressive eyes" class="puppy-image">
+        <img src="Gemini_Generated_Image_mijuvdmijuvdmiju.jpeg" alt="Adorable toy poodle puppy with golden-brown fur and expressive eyes" class="puppy-image">
         <div class="video-container">
-            <video id="petVideo" src="/Standard_Mode_dog_licking_his_paw_.mp4" style="display: none"></video>
-            <video id="playVideo" src="/Standard_Mode_dog_playing___jumping.mp4" style="display: none"></video>
-            <video id="treatVideo" src="/Standard_Mode_dog_sitting___licking_his_paw_.mp4" style="display: none"></video>
+            <video id="petVideo" src="Standard_Mode_dog_licking_his_paw_.mp4" style="display: none"></video>
+            <video id="playVideo" src="Standard_Mode_dog_playing___jumping.mp4" style="display: none"></video>
+            <video id="treatVideo" src="Standard_Mode_dog_sitting___licking_his_paw_.mp4" style="display: none"></video>
         </div>
     </div>
 
@@ -94,18 +94,31 @@
         </div>
     </div>
 
-    <!-- Add word bank and progress tracker -->
     <script src="/static/js/progress_tracker.js"></script>
     <script src="/static/js/word_bank.js"></script>
     
     <script>
-    let happiness = 50;
-    let energy = 100;
+    // DOM Element declarations
     const puppy = document.querySelector('.puppy-image');
     const happinessFill = document.querySelector('.happiness-fill');
     const happinessValue = document.querySelector('.happiness-value');
     const energyValue = document.querySelector('.energy-value');
     const interactionItems = document.querySelector('.interaction-items');
+    const wordDisplay = document.querySelector('.word-display');
+    const readingInput = document.querySelector('.reading-input');
+    const nextWordBtn = document.querySelector('.next-word-btn');
+    const rewardContainer = document.querySelector('.reward-container');
+    const micButton = document.querySelector('.mic-button');
+    const speechStatus = document.querySelector('.speech-status');
+    const speakWordBtn = document.querySelector('.speak-word-btn');
+
+    // Game state variables
+    let happiness = 50;
+    let energy = 100;
+    let currentWord = '';
+
+    // Initialize WordBank
+    const wordBank = new WordBank();
 
     document.querySelectorAll('.interaction-item').forEach(item => {
         item.addEventListener('click', interactWithLeo);
@@ -208,9 +221,6 @@
         readingInput.value = '';
         updateWord();
     }
-
-    // Initialize WordBank
-    const wordBank = new WordBank();
     
     // Update difficulty selection
     document.querySelectorAll('.difficulty-btn').forEach(btn => {
@@ -218,7 +228,7 @@
             document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             wordBank.setDifficulty(btn.dataset.difficulty);
-            updateWord(); // Get a new word with the new difficulty
+            updateWord();
         });
     });
 
@@ -228,7 +238,7 @@
             document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             wordBank.setCategory(btn.dataset.category);
-            updateWord(); // Get a new word with the new category
+            updateWord();
         });
     });
 
@@ -336,15 +346,6 @@
     nextWordBtn.addEventListener('click', updateWord);
 
     // Speech Recognition Setup
-    const micButton = document.querySelector('.mic-button');
-    const speechStatus = document.querySelector('.speech-status');
-    const speakWordBtn = document.querySelector('.speak-word-btn');
-    const wordDisplay = document.querySelector('.word-display');
-    const readingInput = document.querySelector('.reading-input');
-    const nextWordBtn = document.querySelector('.next-word-btn');
-    const rewardContainer = document.querySelector('.reward-container');
-    let currentWord = '';
-
     let recognition = null;
     if ('webkitSpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition();
@@ -405,6 +406,7 @@
 
     // Initialize first word with speech
     updateWord();
+    updateProgressDisplay();
     </script>
 </body>
 </html>
