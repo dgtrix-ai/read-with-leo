@@ -2,24 +2,24 @@ class WordBank {
     constructor() {
         this.categories = {
             animals: {
-                easy: ['cat', 'dog', 'bird', 'fish', 'duck', 'pig', 'hen', 'cow', 'rat', 'frog'],
-                medium: ['rabbit', 'turtle', 'monkey', 'panda', 'tiger', 'horse', 'sheep', 'goat', 'bear', 'lion'],
-                hard: ['elephant', 'giraffe', 'penguin', 'dolphin', 'kangaroo', 'rhinoceros', 'octopus', 'butterfly', 'crocodile', 'zebra']
+                easy: ['cat', 'dog', 'bird', 'fish', 'duck', 'pig', 'hen', 'cow', 'rat', 'frog', 'ant', 'bee'],
+                medium: ['rabbit', 'turtle', 'monkey', 'panda', 'tiger', 'horse', 'sheep', 'goat', 'bear', 'lion', 'snake', 'wolf', 'mouse', 'deer', 'fox'],
+                hard: ['elephant', 'giraffe', 'penguin', 'dolphin', 'kangaroo', 'rhinoceros', 'octopus', 'butterfly', 'crocodile', 'zebra', 'cheetah', 'gazelle', 'squirrel', 'hamster', 'koala']
             },
             colors: {
-                easy: ['red', 'blue', 'pink', 'gray', 'gold', 'green', 'black', 'white', 'brown', 'tan'],
-                medium: ['purple', 'orange', 'yellow', 'silver', 'bronze', 'navy', 'coral', 'peach', 'beige', 'teal'],
-                hard: ['magenta', 'crimson', 'violet', 'indigo', 'maroon', 'turquoise', 'burgundy', 'lavender', 'emerald', 'azure']
+                easy: ['red', 'blue', 'pink', 'gray', 'gold', 'green', 'black', 'white', 'brown', 'tan', 'jade', 'lime'],
+                medium: ['purple', 'orange', 'yellow', 'silver', 'bronze', 'navy', 'coral', 'peach', 'beige', 'teal', 'cream', 'olive', 'plum', 'rose', 'mint'],
+                hard: ['magenta', 'crimson', 'violet', 'indigo', 'maroon', 'turquoise', 'burgundy', 'lavender', 'emerald', 'azure', 'scarlet', 'cerulean', 'mauve', 'periwinkle', 'chartreuse']
             },
             numbers: {
-                easy: ['one', 'two', 'four', 'five', 'ten', 'three', 'six', 'nine', 'zero', 'eight'],
-                medium: ['eleven', 'twelve', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'fifteen', 'sixteen'],
-                hard: ['hundred', 'thousand', 'million', 'billion', 'thirteen', 'fourteen', 'eighteen', 'nineteen', 'eighty', 'ninety']
+                easy: ['one', 'two', 'four', 'five', 'ten', 'three', 'six', 'nine', 'zero', 'eight', 'seven', 'first'],
+                medium: ['eleven', 'twelve', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'fifteen', 'sixteen', 'second', 'third', 'fourth', 'fifth', 'sixth'],
+                hard: ['hundred', 'thousand', 'million', 'billion', 'thirteen', 'fourteen', 'eighteen', 'nineteen', 'eighty', 'ninety', 'seventh', 'eighth', 'ninth', 'tenth', 'quarter']
             },
             objects: {
-                easy: ['ball', 'book', 'toy', 'pen', 'cup', 'box', 'bag', 'hat', 'bed', 'door'],
-                medium: ['table', 'chair', 'phone', 'clock', 'brush', 'pencil', 'ruler', 'paper', 'plate', 'glass'],
-                hard: ['computer', 'keyboard', 'monitor', 'telescope', 'microscope', 'umbrella', 'calendar', 'dictionary', 'backpack', 'furniture']
+                easy: ['ball', 'book', 'toy', 'pen', 'cup', 'box', 'bag', 'hat', 'bed', 'door', 'desk', 'lamp', 'fork', 'soap', 'milk'],
+                medium: ['table', 'chair', 'phone', 'clock', 'brush', 'pencil', 'ruler', 'paper', 'plate', 'glass', 'bottle', 'mirror', 'window', 'basket', 'pillow'],
+                hard: ['computer', 'keyboard', 'monitor', 'telescope', 'microscope', 'umbrella', 'calendar', 'dictionary', 'backpack', 'furniture', 'envelope', 'scissors', 'thermos', 'compass', 'paintbrush']
             }
         };
         
