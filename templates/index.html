@@ -8,6 +8,7 @@
         background: #ff4444;
         animation: pulse 1.5s infinite;
         box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+        transform: scale(1.1);
     }
 
     @keyframes pulse {
@@ -90,6 +91,8 @@
             <button class="category-btn" data-category="colors">Colors</button>
             <button class="category-btn" data-category="numbers">Numbers</button>
             <button class="category-btn" data-category="objects">Objects</button>
+            <button class="category-btn" data-category="food">Food</button>
+            <button class="category-btn" data-category="nature">Nature</button>
         </div>
 
         <div class="word-display">Ready to start!</div>
@@ -112,7 +115,7 @@
     <script src="/static/js/word_bank.js"></script>
     
     <script>
-    // DOM Element declarations - All at the top
+    // DOM Element declarations
     const puppy = document.querySelector('.puppy-image');
     const happinessFill = document.querySelector('.happiness-fill');
     const happinessValue = document.querySelector('.happiness-value');
@@ -209,7 +212,6 @@
             requestAnimationFrame(() => {
                 video.style.opacity = '1';
                 video.play().catch(() => {
-                    // If video playback fails, show the puppy image
                     video.style.opacity = '0';
                     video.style.display = 'none';
                     puppy.style.opacity = '1';
@@ -344,7 +346,6 @@
         btn.addEventListener('click', () => {
             difficultyBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            // Only one button should be active at a time
             wordBank.setDifficulty(btn.dataset.difficulty);
             updateWord();
         });
@@ -354,7 +355,6 @@
         btn.addEventListener('click', () => {
             categoryBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            // Only one button should be active at a time
             wordBank.setCategory(btn.dataset.category);
             updateWord();
         });
@@ -368,10 +368,12 @@
 
     // Speech Recognition Setup
     if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = 'en-US';
+        if (!recognition) {  // Only initialize if not already initialized
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+        }
 
         recognition.onstart = () => {
             micButton.classList.add('listening');
@@ -420,32 +422,21 @@
             
             switch(event.error) {
                 case 'no-speech':
-                    speechStatus.textContent = 'No word was heard. Please try again.';
+                    speechStatus.textContent = 'No word was heard. Click the microphone and speak clearly.';
                     break;
                 case 'network':
-                    speechStatus.textContent = 'Network error occurred. Please check your connection.';
+                    speechStatus.textContent = 'Network error. Please check your connection.';
                     break;
                 case 'not-allowed':
-                    speechStatus.textContent = 'Microphone access denied. Please allow microphone use.';
+                    speechStatus.textContent = 'Please allow microphone access to use speech recognition.';
+                    break;
+                case 'aborted':
+                    speechStatus.textContent = 'Listening stopped. Click microphone to try again.';
                     break;
                 default:
                     speechStatus.textContent = 'Error occurred. Please try again or type the word.';
             }
         };
-    }
-
-    // Text-to-Speech Setup
-    const speechSynthesis = window.speechSynthesis;
-
-    function speakWord(word) {
-        if (speechSynthesis) {
-            speechSynthesis.cancel();
-            
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.rate = 0.8; 
-            utterance.pitch = 1;
-            speechSynthesis.speak(utterance);
-        }
     }
 
     // Event Listeners for Speech Features
@@ -457,6 +448,20 @@
         }
     });
 
+    // Text-to-Speech Setup
+    const speechSynthesis = window.speechSynthesis;
+
+    function speakWord(word) {
+        if (speechSynthesis) {
+            speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.rate = 0.8;
+            utterance.pitch = 1;
+            speechSynthesis.speak(utterance);
+        }
+    }
+
     speakWordBtn.addEventListener('click', () => {
         speechSynthesis.cancel();
         spellOutWord();
@@ -464,6 +469,7 @@
 
     // Initialize first word with speech
     updateWord();
+    updateProgressDisplay();
     </script>
 </body>
 </html>

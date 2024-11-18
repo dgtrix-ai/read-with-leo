@@ -20,6 +20,16 @@ class WordBank {
                 easy: ['ball', 'book', 'toy', 'pen', 'cup', 'box', 'bag', 'hat', 'bed', 'door', 'desk', 'lamp', 'fork', 'soap', 'milk'],
                 medium: ['table', 'chair', 'phone', 'clock', 'brush', 'pencil', 'ruler', 'paper', 'plate', 'glass', 'bottle', 'mirror', 'window', 'basket', 'pillow'],
                 hard: ['computer', 'keyboard', 'monitor', 'telescope', 'microscope', 'umbrella', 'calendar', 'dictionary', 'backpack', 'furniture', 'envelope', 'scissors', 'thermos', 'compass', 'paintbrush']
+            },
+            food: {
+                easy: ['bread', 'milk', 'cake', 'rice', 'fish', 'meat', 'egg', 'soup', 'salt', 'pie', 'corn', 'jam'],
+                medium: ['butter', 'cookie', 'cheese', 'coffee', 'carrot', 'orange', 'apple', 'grape', 'pasta', 'pizza', 'salad', 'sauce', 'juice', 'honey', 'candy'],
+                hard: ['broccoli', 'spaghetti', 'chocolate', 'strawberry', 'blueberry', 'pineapple', 'sandwich', 'hamburger', 'vegetable', 'mushroom', 'avocado', 'pancake', 'yogurt', 'cereal', 'oatmeal']
+            },
+            nature: {
+                easy: ['sun', 'moon', 'star', 'tree', 'rain', 'snow', 'wind', 'leaf', 'rock', 'sand', 'seed', 'soil'],
+                medium: ['flower', 'garden', 'forest', 'river', 'ocean', 'cloud', 'storm', 'beach', 'plant', 'grass', 'water', 'mountain', 'desert', 'valley', 'hill'],
+                hard: ['rainbow', 'volcano', 'waterfall', 'glacier', 'thunder', 'lightning', 'blossom', 'sunrise', 'sunset', 'eclipse', 'climate', 'tsunami', 'tornado', 'hurricane', 'earthquake']
             }
         };
         
