@@ -11,9 +11,9 @@
     }
 
     @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); }
+        0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 68, 68, 0.5); }
+        50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(255, 68, 68, 0.8); }
+        100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 68, 68, 0.5); }
     }
     </style>
 </head>
@@ -361,6 +361,9 @@
     nextWordBtn.addEventListener('click', updateWord);
 
     // Speech Recognition Setup
+    let recognition = null;
+    let speechTimeout = null;
+
     if ('webkitSpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition();
         recognition.continuous = false;
@@ -371,15 +374,31 @@
             micButton.classList.add('listening');
             speechStatus.textContent = 'Listening... Say the word you see';
             micButton.style.transform = 'scale(1.1)';
+            
+            // Add timeout after 5 seconds of no speech
+            speechTimeout = setTimeout(() => {
+                if (micButton.classList.contains('listening')) {
+                    recognition.stop();
+                    speechStatus.textContent = 'No speech detected. Please try again.';
+                }
+            }, 5000);
         };
 
         recognition.onend = () => {
             micButton.classList.remove('listening');
             speechStatus.textContent = 'Listen to the spelling and guess the word';
             micButton.style.transform = 'scale(1)';
+            if (speechTimeout) {
+                clearTimeout(speechTimeout);
+                speechTimeout = null;
+            }
         };
 
         recognition.onresult = (event) => {
+            if (speechTimeout) {
+                clearTimeout(speechTimeout);
+                speechTimeout = null;
+            }
             const transcript = event.results[0][0].transcript.toLowerCase().trim();
             speechStatus.textContent = `You said: "${transcript}"`;
             readingInput.value = transcript;
@@ -388,9 +407,27 @@
 
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
-            speechStatus.textContent = 'Microphone error. Please try again or type the word.';
             micButton.classList.remove('listening');
             micButton.style.transform = 'scale(1)';
+            
+            if (speechTimeout) {
+                clearTimeout(speechTimeout);
+                speechTimeout = null;
+            }
+            
+            switch(event.error) {
+                case 'no-speech':
+                    speechStatus.textContent = 'No word was heard. Please try again.';
+                    break;
+                case 'network':
+                    speechStatus.textContent = 'Network error occurred. Please check your connection.';
+                    break;
+                case 'not-allowed':
+                    speechStatus.textContent = 'Microphone access denied. Please allow microphone use.';
+                    break;
+                default:
+                    speechStatus.textContent = 'Error occurred. Please try again or type the word.';
+            }
         };
     }
 
