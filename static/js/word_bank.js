@@ -2,40 +2,55 @@ class WordBank {
     constructor() {
         this.categories = {
             animals: {
-                easy: ['cat', 'dog', 'bird', 'fish', 'duck'],
-                medium: ['rabbit', 'turtle', 'monkey', 'panda', 'tiger'],
-                hard: ['elephant', 'giraffe', 'penguin', 'dolphin', 'kangaroo']
+                easy: ['cat', 'dog', 'bird', 'fish', 'duck', 'pig', 'hen', 'cow', 'rat', 'frog'],
+                medium: ['rabbit', 'turtle', 'monkey', 'panda', 'tiger', 'horse', 'sheep', 'goat', 'bear', 'lion'],
+                hard: ['elephant', 'giraffe', 'penguin', 'dolphin', 'kangaroo', 'rhinoceros', 'octopus', 'butterfly', 'crocodile', 'zebra']
             },
             colors: {
-                easy: ['red', 'blue', 'pink', 'gray', 'gold'],
-                medium: ['purple', 'orange', 'yellow', 'brown', 'white'],
-                hard: ['magenta', 'crimson', 'violet', 'indigo', 'maroon']
+                easy: ['red', 'blue', 'pink', 'gray', 'gold', 'green', 'black', 'white', 'brown', 'tan'],
+                medium: ['purple', 'orange', 'yellow', 'silver', 'bronze', 'navy', 'coral', 'peach', 'beige', 'teal'],
+                hard: ['magenta', 'crimson', 'violet', 'indigo', 'maroon', 'turquoise', 'burgundy', 'lavender', 'emerald', 'azure']
             },
             numbers: {
-                easy: ['one', 'two', 'four', 'five', 'ten'],
-                medium: ['seven', 'eight', 'three', 'nine', 'six'],
-                hard: ['eleven', 'twelve', 'fifteen', 'twenty', 'thirty']
+                easy: ['one', 'two', 'four', 'five', 'ten', 'three', 'six', 'nine', 'zero', 'eight'],
+                medium: ['eleven', 'twelve', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'fifteen', 'sixteen'],
+                hard: ['hundred', 'thousand', 'million', 'billion', 'thirteen', 'fourteen', 'eighteen', 'nineteen', 'eighty', 'ninety']
             },
             objects: {
-                easy: ['ball', 'book', 'toy', 'pen', 'cup'],
-                medium: ['table', 'chair', 'phone', 'clock', 'brush'],
-                hard: ['pencil', 'computer', 'window', 'picture', 'blanket']
+                easy: ['ball', 'book', 'toy', 'pen', 'cup', 'box', 'bag', 'hat', 'bed', 'door'],
+                medium: ['table', 'chair', 'phone', 'clock', 'brush', 'pencil', 'ruler', 'paper', 'plate', 'glass'],
+                hard: ['computer', 'keyboard', 'monitor', 'telescope', 'microscope', 'umbrella', 'calendar', 'dictionary', 'backpack', 'furniture']
             }
         };
         
-        this.currentDifficulty = 'easy';
+        this.progressTracker = new ProgressTracker();
         this.currentCategory = 'animals';
     }
 
     getRandomWord() {
-        const categoryWords = this.categories[this.currentCategory][this.currentDifficulty];
+        // Check for review words first
+        const reviewWord = this.progressTracker.getNextWord(this);
+        if (reviewWord) {
+            return reviewWord;
+        }
+
+        // Get words from current difficulty and category
+        const difficulty = this.progressTracker.getCurrentLevel();
+        const categoryWords = this.categories[this.currentCategory][difficulty];
         return categoryWords[Math.floor(Math.random() * categoryWords.length)];
     }
 
-    setDifficulty(difficulty) {
-        if (['easy', 'medium', 'hard'].includes(difficulty)) {
-            this.currentDifficulty = difficulty;
+    recordAttempt(word, isCorrect) {
+        this.progressTracker.recordAttempt(word, isCorrect);
+        const progression = this.progressTracker.checkLevelProgression();
+        
+        if (progression) {
+            return {
+                type: progression,
+                newLevel: this.progressTracker.getCurrentLevel()
+            };
         }
+        return null;
     }
 
     setCategory(category) {
@@ -44,11 +59,11 @@ class WordBank {
         }
     }
 
-    getAllCategories() {
-        return Object.keys(this.categories);
+    getProgressStats() {
+        return this.progressTracker.getProgressStats();
     }
 
-    getCurrentDifficulty() {
-        return this.currentDifficulty;
+    getCurrentLevel() {
+        return this.progressTracker.getCurrentLevel();
     }
 }

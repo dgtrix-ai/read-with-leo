@@ -111,4 +111,56 @@ h1 {
   letter-spacing: 4px;
 }
 
-/* Continue with all other CSS styles from the original file */
+.progress-stats {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.stat-icon {
+    font-size: 1.2rem;
+}
+
+.stat-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.success-rate,
+.consecutive-correct,
+.review-count {
+    font-weight: 600;
+    color: #ffd700;
+}
+
+.difficulty-btn.active {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.difficulty-btn.active::after {
+    content: '👉';
+    position: absolute;
+    right: -25px;
+    animation: bounce 0.5s infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateX(0); }
+    to { transform: translateX(5px); }
+}
