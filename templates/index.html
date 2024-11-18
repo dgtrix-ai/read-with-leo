@@ -125,12 +125,15 @@
     const micButton = document.querySelector('.mic-button');
     const speechStatus = document.querySelector('.speech-status');
     const speakWordBtn = document.querySelector('.speak-word-btn');
+    const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+    const categoryBtns = document.querySelectorAll('.category-btn');
 
     // State variables
     let happiness = 50;
     let energy = 100;
     let currentWord = '';
     let recognition = null;
+    let speechTimeout = null;
 
     // Initialize WordBank
     const wordBank = new WordBank();
@@ -291,7 +294,7 @@
             if (progression) {
                 if (progression.type === 'advance') {
                     message = `🎉 Amazing! You've advanced to ${progression.newLevel} level! 🎉`;
-                    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    difficultyBtns.forEach(btn => {
                         btn.classList.remove('active');
                         if (btn.dataset.difficulty === progression.newLevel) {
                             btn.classList.add('active');
@@ -319,7 +322,7 @@
             
             if (progression && progression.type === 'regress') {
                 wordDisplay.textContent = `Let's try some easier words! Moving to ${progression.newLevel} level.`;
-                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                difficultyBtns.forEach(btn => {
                     btn.classList.remove('active');
                     if (btn.dataset.difficulty === progression.newLevel) {
                         btn.classList.add('active');
@@ -336,19 +339,22 @@
         item.addEventListener('click', interactWithLeo);
     });
 
-    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+    // Updated button click handlers
+    difficultyBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+            difficultyBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            // Only one button should be active at a time
             wordBank.setDifficulty(btn.dataset.difficulty);
             updateWord();
         });
     });
 
-    document.querySelectorAll('.category-btn').forEach(btn => {
+    categoryBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            categoryBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            // Only one button should be active at a time
             wordBank.setCategory(btn.dataset.category);
             updateWord();
         });
@@ -361,9 +367,6 @@
     nextWordBtn.addEventListener('click', updateWord);
 
     // Speech Recognition Setup
-    let recognition = null;
-    let speechTimeout = null;
-
     if ('webkitSpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition();
         recognition.continuous = false;
@@ -439,7 +442,7 @@
             speechSynthesis.cancel();
             
             const utterance = new SpeechSynthesisUtterance(word);
-            utterance.rate = 0.8;
+            utterance.rate = 0.8; 
             utterance.pitch = 1;
             speechSynthesis.speak(utterance);
         }
@@ -459,9 +462,8 @@
         spellOutWord();
     });
 
-    // Initialize first word with speech and progress display
+    // Initialize first word with speech
     updateWord();
-    updateProgressDisplay();
     </script>
 </body>
 </html>
