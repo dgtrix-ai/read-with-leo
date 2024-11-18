@@ -38,11 +38,11 @@
     </div>
 
     <div class="puppy-container">
-        <img src="/static/images/puppy.svg" alt="Adorable toy poodle puppy with golden-brown fur and expressive eyes" class="puppy-image">
+        <img src="Gemini_Generated_Image_mijuvdmijuvdmiju.jpeg" alt="Adorable toy poodle puppy with golden-brown fur and expressive eyes" class="puppy-image">
         <div class="video-container">
-            <video id="petVideo" src="/static/videos/petting.mp4" style="display: none"></video>
-            <video id="playVideo" src="/static/videos/playing.mp4" style="display: none"></video>
-            <video id="treatVideo" src="/static/videos/treating.mp4" style="display: none"></video>
+            <video id="petVideo" src="Standard_Mode_dog_licking_his_paw_.mp4" style="display: none"></video>
+            <video id="playVideo" src="Standard_Mode_dog_playing___jumping.mp4" style="display: none"></video>
+            <video id="treatVideo" src="Standard_Mode_dog_sitting___licking_his_paw_.mp4" style="display: none"></video>
         </div>
     </div>
 
@@ -107,6 +107,7 @@
         </div>
     </div>
 
+    <script src="/static/js/video-generator.js"></script>
     <script src="/static/js/progress_tracker.js"></script>
     <script src="/static/js/word_bank.js"></script>
     
@@ -204,8 +205,8 @@
             video.style.display = 'block';
             requestAnimationFrame(() => {
                 video.style.opacity = '1';
-                video.play().catch(error => {
-                    console.log('Video playback failed:', error);
+                video.play().catch(() => {
+                    // If video playback fails, show the puppy image
                     video.style.opacity = '0';
                     video.style.display = 'none';
                     puppy.style.opacity = '1';
