@@ -3,6 +3,18 @@
 <head>
     <title>Read with Leo the Puppy! 🐕📚</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    .mic-button.listening {
+        background: #ff4444;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    </style>
 </head>
 <body>
     <h1>Play with Leo! 🐕✨</h1>
@@ -98,7 +110,7 @@
     <script src="/static/js/word_bank.js"></script>
     
     <script>
-    // DOM Element declarations
+    // DOM Element declarations - All at the top
     const puppy = document.querySelector('.puppy-image');
     const happinessFill = document.querySelector('.happiness-fill');
     const happinessValue = document.querySelector('.happiness-value');
@@ -112,18 +124,16 @@
     const speechStatus = document.querySelector('.speech-status');
     const speakWordBtn = document.querySelector('.speak-word-btn');
 
-    // Game state variables
+    // State variables
     let happiness = 50;
     let energy = 100;
     let currentWord = '';
+    let recognition = null;
 
     // Initialize WordBank
     const wordBank = new WordBank();
 
-    document.querySelectorAll('.interaction-item').forEach(item => {
-        item.addEventListener('click', interactWithLeo);
-    });
-
+    // Function Definitions
     function updateStats() {
         happiness = Math.min(100, Math.max(0, happiness));
         energy = Math.min(100, Math.max(0, energy));
@@ -221,26 +231,6 @@
         readingInput.value = '';
         updateWord();
     }
-    
-    // Update difficulty selection
-    document.querySelectorAll('.difficulty-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            wordBank.setDifficulty(btn.dataset.difficulty);
-            updateWord();
-        });
-    });
-
-    // Update category selection
-    document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            wordBank.setCategory(btn.dataset.category);
-            updateWord();
-        });
-    });
 
     function getRandomWord() {
         return wordBank.getRandomWord();
@@ -339,6 +329,29 @@
         updateProgressDisplay();
     }
 
+    // Event Listeners
+    document.querySelectorAll('.interaction-item').forEach(item => {
+        item.addEventListener('click', interactWithLeo);
+    });
+
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            wordBank.setDifficulty(btn.dataset.difficulty);
+            updateWord();
+        });
+    });
+
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            wordBank.setCategory(btn.dataset.category);
+            updateWord();
+        });
+    });
+
     readingInput.addEventListener('input', () => {
         checkWord();
     });
@@ -346,7 +359,6 @@
     nextWordBtn.addEventListener('click', updateWord);
 
     // Speech Recognition Setup
-    let recognition = null;
     if ('webkitSpeechRecognition' in window) {
         recognition = new webkitSpeechRecognition();
         recognition.continuous = false;
@@ -355,7 +367,7 @@
 
         recognition.onstart = () => {
             micButton.classList.add('listening');
-            speechStatus.textContent = 'Listening...';
+            speechStatus.textContent = 'Listening... Say the word you see';
         };
 
         recognition.onend = () => {
@@ -371,7 +383,7 @@
 
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
-            speechStatus.textContent = 'Error occurred. Please try again.';
+            speechStatus.textContent = 'Microphone error. Please try again or type the word.';
             micButton.classList.remove('listening');
         };
     }
@@ -404,7 +416,7 @@
         spellOutWord();
     });
 
-    // Initialize first word with speech
+    // Initialize first word with speech and progress display
     updateWord();
     updateProgressDisplay();
     </script>
