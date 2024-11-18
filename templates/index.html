@@ -25,20 +25,11 @@
     </div>
 
     <div class="puppy-container">
-        <img src="/static/images/puppy.svg" alt="Adorable toy poodle puppy with golden-brown fur and expressive eyes" class="puppy-image">
+        <img src="/a/5384e0ad-842a-46e6-afa0-ae6492391379" alt="Adorable toy poodle puppy with golden-brown fur and expressive eyes" class="puppy-image">
         <div class="video-container">
-            <video id="petVideo" style="display: none">
-                <source src="/static/videos/petting.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            <video id="playVideo" style="display: none">
-                <source src="/static/videos/playing.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            <video id="treatVideo" style="display: none">
-                <source src="/static/videos/treating.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
+            <video id="petVideo" src="/Standard_Mode_dog_licking_his_paw_.mp4" style="display: none"></video>
+            <video id="playVideo" src="/Standard_Mode_dog_playing___jumping.mp4" style="display: none"></video>
+            <video id="treatVideo" src="/Standard_Mode_dog_sitting___licking_his_paw_.mp4" style="display: none"></video>
         </div>
     </div>
 
@@ -103,42 +94,11 @@
         </div>
     </div>
 
-    <!-- Add word bank and progress tracker before other scripts -->
+    <!-- Add word bank and progress tracker -->
     <script src="/static/js/progress_tracker.js"></script>
     <script src="/static/js/word_bank.js"></script>
-    <script src="/static/js/video-generator.js"></script>
     
     <script>
-    // Improved video error handling
-    window.addEventListener('unhandledrejection', function(event) {
-        console.log('Handling unhandled promise rejection:', event);
-        if (event.reason && event.reason instanceof Error) {
-            // If it's a video playback error, fallback to canvas animation
-            const videos = document.querySelectorAll('.video-container video');
-            videos.forEach(video => {
-                video.style.opacity = '0';
-                video.style.display = 'none';
-                // Trigger canvas animation fallback
-                video.dispatchEvent(new Event('error'));
-            });
-            document.querySelector('.puppy-image').style.opacity = '1';
-        }
-        // Prevent the error from appearing in console
-        event.preventDefault();
-    });
-
-    // Add error event listeners to video elements
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.video-container video').forEach(video => {
-            video.addEventListener('error', (e) => {
-                console.log('Video error:', e);
-                video.style.opacity = '0';
-                video.style.display = 'none';
-                puppy.style.opacity = '1';
-            });
-        });
-    });
-
     let happiness = 50;
     let energy = 100;
     const puppy = document.querySelector('.puppy-image');
@@ -220,18 +180,12 @@
             video.style.display = 'block';
             requestAnimationFrame(() => {
                 video.style.opacity = '1';
-                video.play()
-                    .then(() => {
-                        // Video started playing successfully
-                    })
-                    .catch(error => {
-                        console.log('Video playback failed:', error);
-                        video.style.opacity = '0';
-                        video.style.display = 'none';
-                        puppy.style.opacity = '1';
-                        // Trigger the canvas animation fallback
-                        video.dispatchEvent(new Event('error'));
-                    });
+                video.play().catch(error => {
+                    console.log('Video playback failed:', error);
+                    video.style.opacity = '0';
+                    video.style.display = 'none';
+                    puppy.style.opacity = '1';
+                });
             });
             
             video.onended = function() {
@@ -278,14 +232,6 @@
         });
     });
 
-    const words = ['puppy', 'play', 'happy', 'friend', 'love', 'bark', 'fetch', 'treat', 'walk', 'good'];
-    let currentWord = '';
-    const wordDisplay = document.querySelector('.word-display');
-    const readingInput = document.querySelector('.reading-input');
-    const nextWordBtn = document.querySelector('.next-word-btn');
-    const rewardContainer = document.querySelector('.reward-container');
-
-    // Update the getRandomWord function to use WordBank
     function getRandomWord() {
         return wordBank.getRandomWord();
     }
@@ -312,6 +258,13 @@
         }, 1000); 
     }
 
+    function updateProgressDisplay() {
+        const stats = wordBank.getProgressStats();
+        document.querySelector('.success-rate').textContent = `${Math.round(stats.successRate)}%`;
+        document.querySelector('.consecutive-correct').textContent = stats.consecutiveCorrect;
+        document.querySelector('.review-count').textContent = stats.reviewQueueLength;
+    }
+
     function updateWord() {
         currentWord = getRandomWord();
         readingInput.value = '';
@@ -325,13 +278,6 @@
         }, 1000);
     }
 
-    function updateProgressDisplay() {
-        const stats = wordBank.getProgressStats();
-        document.querySelector('.success-rate').textContent = `${Math.round(stats.successRate)}%`;
-        document.querySelector('.consecutive-correct').textContent = stats.consecutiveCorrect;
-        document.querySelector('.review-count').textContent = stats.reviewQueueLength;
-    }
-
     function checkWord() {
         const isCorrect = readingInput.value.toLowerCase().trim() === currentWord.toLowerCase();
         const progression = wordBank.recordAttempt(currentWord, isCorrect);
@@ -343,7 +289,6 @@
             if (progression) {
                 if (progression.type === 'advance') {
                     message = `🎉 Amazing! You've advanced to ${progression.newLevel} level! 🎉`;
-                    // Update difficulty buttons
                     document.querySelectorAll('.difficulty-btn').forEach(btn => {
                         btn.classList.remove('active');
                         if (btn.dataset.difficulty === progression.newLevel) {
@@ -372,7 +317,6 @@
             
             if (progression && progression.type === 'regress') {
                 wordDisplay.textContent = `Let's try some easier words! Moving to ${progression.newLevel} level.`;
-                // Update difficulty buttons
                 document.querySelectorAll('.difficulty-btn').forEach(btn => {
                     btn.classList.remove('active');
                     if (btn.dataset.difficulty === progression.newLevel) {
@@ -395,6 +339,11 @@
     const micButton = document.querySelector('.mic-button');
     const speechStatus = document.querySelector('.speech-status');
     const speakWordBtn = document.querySelector('.speak-word-btn');
+    const wordDisplay = document.querySelector('.word-display');
+    const readingInput = document.querySelector('.reading-input');
+    const nextWordBtn = document.querySelector('.next-word-btn');
+    const rewardContainer = document.querySelector('.reward-container');
+    let currentWord = '';
 
     let recognition = null;
     if ('webkitSpeechRecognition' in window) {
@@ -416,14 +365,7 @@
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript.toLowerCase().trim();
             readingInput.value = transcript;
-            if (transcript === currentWord.toLowerCase()) {
-                checkWord();
-            } else {
-                wordDisplay.textContent = '❌ Try again!';
-                rewardContainer.style.display = 'none';
-                interactionItems.style.display = 'none';
-                speakWord("Try again!");
-            }
+            checkWord();
         };
 
         recognition.onerror = (event) => {
@@ -441,7 +383,7 @@
             speechSynthesis.cancel();
             
             const utterance = new SpeechSynthesisUtterance(word);
-            utterance.rate = 0.8; 
+            utterance.rate = 0.8;
             utterance.pitch = 1;
             speechSynthesis.speak(utterance);
         }
@@ -463,8 +405,6 @@
 
     // Initialize first word with speech
     updateWord();
-    // Initialize progress display
-    updateProgressDisplay();
     </script>
 </body>
 </html>
