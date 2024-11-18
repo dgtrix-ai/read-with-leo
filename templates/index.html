@@ -110,6 +110,7 @@
         </div>
     </div>
 
+    <script src="/static/js/learning_path.js"></script>
     <script src="/static/js/video-generator.js"></script>
     <script src="/static/js/progress_tracker.js"></script>
     <script src="/static/js/word_bank.js"></script>
@@ -137,6 +138,14 @@
     let currentWord = '';
     let recognition = null;
     let speechTimeout = null;
+
+    // Initialize Speech Recognition
+    if ('webkitSpeechRecognition' in window && !recognition) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+    }
 
     // Initialize WordBank
     const wordBank = new WordBank();
