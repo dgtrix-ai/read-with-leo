@@ -2,7 +2,219 @@
 <html>
 <head>
     <title>Read with Leo the Puppy! 🐕📚</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+    /* Keep existing styles */
+    body {
+        margin: 0;
+        padding: 5px;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1a1d24 0%, #2c3037 100%);
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #ffffff;
+        gap: 5px;
+        overflow-x: hidden;
+    }
+
+    /* Update puppy-container */
+    .puppy-container {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        perspective: 1000px;
+        min-height: 300px;
+        max-height: 300px;
+        z-index: 2;
+    }
+
+    /* Update video-container */
+    .video-container {
+        position: absolute;
+        width: 250px;
+        height: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1;
+    }
+
+    /* Update video element */
+    .video-container video {
+        width: 250px;
+        height: auto;
+        max-width: 100%;
+        border-radius: 15px;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        position: absolute;
+    }
+
+    /* Keep other existing styles */
+    .stats-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .stats {
+        display: flex;
+        gap: 10px;
+    }
+
+    .stat {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 1.2rem;
+    }
+
+    .stat-icon {
+        font-size: 1.5rem;
+    }
+
+    .happiness-meter {
+        width: 100%;
+        height: 10px;
+        background-color: #333;
+        border-radius: 5px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .happiness-fill {
+        height: 100%;
+        background-color: #ffd700;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 50%;
+        transition: width 0.3s ease-in-out;
+    }
+
+    .puppy-image {
+        width: 250px;
+        height: auto;
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .interaction-items {
+        display: flex;
+        gap: 10px;
+        margin: 10px 0;
+    }
+
+    .interaction-item {
+        background-color: #444;
+        padding: 10px 15px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .interaction-item:hover {
+        background-color: #555;
+    }
+
+    .reading-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+        margin: 20px 0;
+    }
+
+    .word-display {
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    .speech-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 5px;
+    }
+
+    .mic-button,
+    .speak-word-btn {
+        background-color: #444;
+        padding: 8px 12px;
+        border-radius: 5px;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .mic-button.listening {
+        background-color: #ffd700;
+    }
+
+    .mic-button:hover,
+    .speak-word-btn:hover {
+        background-color: #555;
+    }
+
+    .speech-status {
+        font-size: 1rem;
+    }
+
+    .reading-input {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #333;
+        color: #fff;
+        font-size: 1.2rem;
+    }
+
+    .next-word-btn {
+        background-color: #444;
+        padding: 10px 15px;
+        border-radius: 5px;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .next-word-btn:hover {
+        background-color: #555;
+    }
+
+    .reward-container {
+        display: none;
+        align-items: center;
+    }
+
+    .particle {
+        position: absolute;
+        font-size: 1.5rem;
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
+    }
+    </style>
 </head>
 <body>
     <h1>Play with Leo! 🐕✨</h1>
