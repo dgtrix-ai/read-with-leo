@@ -350,7 +350,6 @@
         item.addEventListener('click', interactWithLeo);
     });
 
-    // Updated button click handlers
     difficultyBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             difficultyBtns.forEach(b => b.classList.remove('active'));
@@ -375,15 +374,8 @@
 
     nextWordBtn.addEventListener('click', updateWord);
 
-    // Speech Recognition Setup
-    if ('webkitSpeechRecognition' in window) {
-        if (!recognition) {  // Only initialize if not already initialized
-            recognition = new webkitSpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-        }
-
+    // Speech Recognition Event Handlers
+    if (recognition) {
         recognition.onstart = () => {
             micButton.classList.add('listening');
             speechStatus.textContent = 'Listening... Say the word you see';
@@ -420,15 +412,6 @@
         };
 
         recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
-            micButton.classList.remove('listening');
-            micButton.style.transform = 'scale(1)';
-            
-            if (speechTimeout) {
-                clearTimeout(speechTimeout);
-                speechTimeout = null;
-            }
-            
             switch(event.error) {
                 case 'no-speech':
                     speechStatus.textContent = 'No word was heard. Click the microphone and speak clearly.';
@@ -443,7 +426,14 @@
                     speechStatus.textContent = 'Listening stopped. Click microphone to try again.';
                     break;
                 default:
-                    speechStatus.textContent = 'Error occurred. Please try again or type the word.';
+                    speechStatus.textContent = 'Error occurred. Please try again.';
+            }
+            micButton.classList.remove('listening');
+            micButton.style.transform = 'scale(1)';
+            
+            if (speechTimeout) {
+                clearTimeout(speechTimeout);
+                speechTimeout = null;
             }
         };
     }
