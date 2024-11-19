@@ -139,12 +139,28 @@
     let recognition = null;
     let speechTimeout = null;
 
-    // Initialize Speech Recognition
-    if ('webkitSpeechRecognition' in window && !recognition) {
-        recognition = new webkitSpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = 'en-US';
+    // Browser compatibility check
+    if (!('webkitSpeechRecognition' in window)) {
+        console.warn('Speech recognition not supported in this browser');
+        speechStatus.textContent = 'Speech recognition is not supported in your browser. Please try typing instead.';
+        micButton.disabled = true;
+        micButton.style.opacity = '0.5';
+    } else {
+        // Initialize Speech Recognition with error handling
+        if (!recognition) {
+            try {
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                // Add initialization success message
+                console.log('Speech recognition initialized successfully');
+            } catch (error) {
+                console.error('Error initializing speech recognition:', error);
+                speechStatus.textContent = 'Speech recognition initialization failed. Please try reloading.';
+            }
+        }
     }
 
     // Initialize WordBank
@@ -438,16 +454,7 @@
         };
     }
 
-    // Event Listeners for Speech Features
-    micButton.addEventListener('click', () => {
-        if (recognition) {
-            recognition.start();
-        } else {
-            alert('Speech recognition is not supported in your browser.');
-        }
-    });
-
-    // Text-to-Speech Setup
+    // Speech Synthesis Setup
     const speechSynthesis = window.speechSynthesis;
 
     function speakWord(word) {
@@ -460,6 +467,15 @@
             speechSynthesis.speak(utterance);
         }
     }
+
+    // Event Listeners for Speech Features
+    micButton.addEventListener('click', () => {
+        if (recognition) {
+            recognition.start();
+        } else {
+            alert('Speech recognition is not supported in your browser.');
+        }
+    });
 
     speakWordBtn.addEventListener('click', () => {
         speechSynthesis.cancel();
