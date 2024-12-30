@@ -146,16 +146,111 @@
         micButton.disabled = true;
         micButton.style.opacity = '0.5';
     } else {
-        // Initialize Speech Recognition with error handling
+        // Initialize Speech Recognition with debug logging
         if (!recognition) {
             try {
                 recognition = new webkitSpeechRecognition();
                 recognition.continuous = false;
                 recognition.interimResults = false;
                 recognition.lang = 'en-US';
-                
-                // Add initialization success message
+
                 console.log('Speech recognition initialized successfully');
+
+                recognition.onstart = () => {
+                    console.log('Speech recognition started');
+                    micButton.classList.add('listening');
+                    speechStatus.textContent = 'Listening... Say the word you see';
+                    micButton.style.transform = 'scale(1.1)';
+
+                    // Add timeout after 5 seconds of no speech
+                    speechTimeout = setTimeout(() => {
+                        if (micButton.classList.contains('listening')) {
+                            recognition.stop();
+                            speechStatus.textContent = 'No speech detected. Please try again.';
+                        }
+                    }, 5000);
+                };
+
+                recognition.onend = () => {
+                    console.log('Speech recognition ended');
+                    micButton.classList.remove('listening');
+                    speechStatus.textContent = 'Listen to the spelling and guess the word';
+                    micButton.style.transform = 'scale(1)';
+                    if (speechTimeout) {
+                        clearTimeout(speechTimeout);
+                        speechTimeout = null;
+                    }
+                };
+
+                recognition.onresult = (event) => {
+                    if (speechTimeout) {
+                        clearTimeout(speechTimeout);
+                        speechTimeout = null;
+                    }
+                    const transcript = event.results[0][0].transcript.toLowerCase().trim();
+                    const confidence = event.results[0][0].confidence;
+
+                    console.log('Speech recognized:', transcript, 'Confidence:', confidence);
+
+                    // Show confidence level more prominently
+                    const confidencePercent = Math.round(confidence * 100);
+                    speechStatus.textContent = `I heard: "${transcript}"\nConfidence: ${confidencePercent}%`;
+
+                    // Clean up both the transcript and current word for comparison
+                    const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                    const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
+
+                    readingInput.value = transcript;
+
+                    if (confidence < 0.5) {
+                        speechStatus.textContent += '\nLow confidence - Please speak more clearly and try again';
+                        return;
+                    }
+
+                    // Show clear feedback about the word matching
+                    if (cleanTranscript === cleanCurrentWord) {
+                        speechStatus.textContent += '\n✅ Perfect match!';
+                        checkWord();
+                    } else {
+                        wordDisplay.textContent = '❌ Try again!';
+                        rewardContainer.style.display = 'none';
+                        interactionItems.style.display = 'none';
+                        speakWord("That's not quite right. Try again!");
+
+                        // Show clear comparison
+                        speechStatus.textContent += `\nExpected word: "${currentWord}"`;
+                        speechStatus.textContent += `\nThey don't match - Please try again`;
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    switch(event.error) {
+                        case 'no-speech':
+                            speechStatus.textContent = 'No word was detected. Please speak clearly and try again.';
+                            break;
+                        case 'network':
+                            speechStatus.textContent = 'Network error occurred. Please check your connection.';
+                            break;
+                        case 'not-allowed':
+                        case 'security':
+                            speechStatus.textContent = 'Microphone access denied. Please allow microphone access in your browser settings.';
+                            micButton.disabled = true;
+                            break;
+                        case 'aborted':
+                            speechStatus.textContent = 'Listening was stopped. Click the microphone to try again.';
+                            break;
+                        default:
+                            speechStatus.textContent = `Error occurred: ${event.error}. Please try again.`;
+                    }
+                    micButton.classList.remove('listening');
+                    micButton.style.transform = 'scale(1)';
+
+                    if (speechTimeout) {
+                        clearTimeout(speechTimeout);
+                        speechTimeout = null;
+                    }
+                };
             } catch (error) {
                 console.error('Error initializing speech recognition:', error);
                 speechStatus.textContent = 'Speech recognition initialization failed. Please try reloading.';
@@ -390,100 +485,20 @@
 
     nextWordBtn.addEventListener('click', updateWord);
 
-    // Speech Recognition Event Handlers
-    if (recognition) {
-        recognition.onstart = () => {
-            micButton.classList.add('listening');
-            speechStatus.textContent = 'Listening... Say the word you see';
-            micButton.style.transform = 'scale(1.1)';
-            
-            // Add timeout after 5 seconds of no speech
-            speechTimeout = setTimeout(() => {
-                if (micButton.classList.contains('listening')) {
-                    recognition.stop();
-                    speechStatus.textContent = 'No speech detected. Please try again.';
-                }
-            }, 5000);
-        };
+    // Event Listeners for Speech Features
+    micButton.addEventListener('click', () => {
+        console.log('Mic button clicked');
+        if (recognition) {
+            recognition.start();
+        } else {
+            alert('Speech recognition is not supported in your browser.');
+        }
+    });
 
-        recognition.onend = () => {
-            micButton.classList.remove('listening');
-            speechStatus.textContent = 'Listen to the spelling and guess the word';
-            micButton.style.transform = 'scale(1)';
-            if (speechTimeout) {
-                clearTimeout(speechTimeout);
-                speechTimeout = null;
-            }
-        };
-
-        recognition.onresult = (event) => {
-                if (speechTimeout) {
-                    clearTimeout(speechTimeout);
-                    speechTimeout = null;
-                }
-                const transcript = event.results[0][0].transcript.toLowerCase().trim();
-                const confidence = event.results[0][0].confidence;
-
-                // Show confidence level more prominently
-                const confidencePercent = Math.round(confidence * 100);
-                speechStatus.textContent = `I heard: "${transcript}"\nConfidence: ${confidencePercent}%`;
-
-                // Clean up both the transcript and current word for comparison
-                const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
-                const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
-
-                readingInput.value = transcript;
-
-                if (confidence < 0.5) {
-                    speechStatus.textContent += '\nLow confidence - Please speak more clearly and try again';
-                    return;
-                }
-
-                // Show clear feedback about the word matching
-                if (cleanTranscript === cleanCurrentWord) {
-                    speechStatus.textContent += '\n✅ Perfect match!';
-                    checkWord();
-                } else {
-                    wordDisplay.textContent = '❌ Try again!';
-                    rewardContainer.style.display = 'none';
-                    interactionItems.style.display = 'none';
-                    speakWord("That's not quite right. Try again!");
-
-                    // Show clear comparison
-                    speechStatus.textContent += `\nExpected word: "${currentWord}"`;
-                    speechStatus.textContent += `\nThey don't match - Please try again`;
-                }
-            };
-
-        recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
-            switch(event.error) {
-                case 'no-speech':
-                    speechStatus.textContent = 'No word was detected. Please speak clearly and try again.';
-                    break;
-                case 'network':
-                    speechStatus.textContent = 'Network error occurred. Please check your connection.';
-                    break;
-                case 'not-allowed':
-                case 'security':
-                    speechStatus.textContent = 'Microphone access denied. Please allow microphone access in your browser settings.';
-                    micButton.disabled = true;
-                    break;
-                case 'aborted':
-                    speechStatus.textContent = 'Listening was stopped. Click the microphone to try again.';
-                    break;
-                default:
-                    speechStatus.textContent = `Error occurred: ${event.error}. Please try again.`;
-            }
-            micButton.classList.remove('listening');
-            micButton.style.transform = 'scale(1)';
-
-            if (speechTimeout) {
-                clearTimeout(speechTimeout);
-                speechTimeout = null;
-            }
-        };
-    }
+    speakWordBtn.addEventListener('click', () => {
+        speechSynthesis.cancel();
+        spellOutWord();
+    });
 
     // Speech Synthesis Setup
     const speechSynthesis = window.speechSynthesis;
@@ -498,20 +513,6 @@
             speechSynthesis.speak(utterance);
         }
     }
-
-    // Event Listeners for Speech Features
-    micButton.addEventListener('click', () => {
-        if (recognition) {
-            recognition.start();
-        } else {
-            alert('Speech recognition is not supported in your browser.');
-        }
-    });
-
-    speakWordBtn.addEventListener('click', () => {
-        speechSynthesis.cancel();
-        spellOutWord();
-    });
 
     // Initialize first word with speech
     updateWord();
