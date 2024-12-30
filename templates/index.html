@@ -417,40 +417,43 @@
         };
 
         recognition.onresult = (event) => {
-            if (speechTimeout) {
-                clearTimeout(speechTimeout);
-                speechTimeout = null;
-            }
-            const transcript = event.results[0][0].transcript.toLowerCase().trim();
-            const confidence = event.results[0][0].confidence;
+                if (speechTimeout) {
+                    clearTimeout(speechTimeout);
+                    speechTimeout = null;
+                }
+                const transcript = event.results[0][0].transcript.toLowerCase().trim();
+                const confidence = event.results[0][0].confidence;
 
-            // Show what was recognized
-            speechStatus.textContent = `You said: "${transcript}" (Confidence: ${Math.round(confidence * 100)}%)`;
+                // Show confidence level more prominently
+                const confidencePercent = Math.round(confidence * 100);
+                speechStatus.textContent = `I heard: "${transcript}"\nConfidence: ${confidencePercent}%`;
 
-            // Clean up both the transcript and current word for comparison
-            const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
-            const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                // Clean up both the transcript and current word for comparison
+                const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
 
-            if (confidence < 0.5) {
-                speechStatus.textContent += ' - Low confidence, please try again';
-                return;
-            }
+                readingInput.value = transcript;
 
-            readingInput.value = transcript;
+                if (confidence < 0.5) {
+                    speechStatus.textContent += '\nLow confidence - Please speak more clearly and try again';
+                    return;
+                }
 
-            // Check if the words match
-            if (cleanTranscript === cleanCurrentWord) {
-                checkWord();
-            } else {
-                wordDisplay.textContent = '❌ Try again!';
-                rewardContainer.style.display = 'none';
-                interactionItems.style.display = 'none';
-                speakWord("That's not quite right. Try again!");
+                // Show clear feedback about the word matching
+                if (cleanTranscript === cleanCurrentWord) {
+                    speechStatus.textContent += '\n✅ Perfect match!';
+                    checkWord();
+                } else {
+                    wordDisplay.textContent = '❌ Try again!';
+                    rewardContainer.style.display = 'none';
+                    interactionItems.style.display = 'none';
+                    speakWord("That's not quite right. Try again!");
 
-                // Show both words for comparison
-                speechStatus.textContent += `\nExpected: "${currentWord}"`;
-            }
-        };
+                    // Show clear comparison
+                    speechStatus.textContent += `\nExpected word: "${currentWord}"`;
+                    speechStatus.textContent += `\nThey don't match - Please try again`;
+                }
+            };
 
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
