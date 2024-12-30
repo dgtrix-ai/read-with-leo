@@ -422,31 +422,59 @@
                 speechTimeout = null;
             }
             const transcript = event.results[0][0].transcript.toLowerCase().trim();
-            speechStatus.textContent = `You said: "${transcript}"`;
+            const confidence = event.results[0][0].confidence;
+
+            // Show what was recognized
+            speechStatus.textContent = `You said: "${transcript}" (Confidence: ${Math.round(confidence * 100)}%)`;
+
+            // Clean up both the transcript and current word for comparison
+            const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
+            const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
+
+            if (confidence < 0.5) {
+                speechStatus.textContent += ' - Low confidence, please try again';
+                return;
+            }
+
             readingInput.value = transcript;
-            checkWord();
+
+            // Check if the words match
+            if (cleanTranscript === cleanCurrentWord) {
+                checkWord();
+            } else {
+                wordDisplay.textContent = '❌ Try again!';
+                rewardContainer.style.display = 'none';
+                interactionItems.style.display = 'none';
+                speakWord("That's not quite right. Try again!");
+
+                // Show both words for comparison
+                speechStatus.textContent += `\nExpected: "${currentWord}"`;
+            }
         };
 
         recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
             switch(event.error) {
                 case 'no-speech':
-                    speechStatus.textContent = 'No word was heard. Click the microphone and speak clearly.';
+                    speechStatus.textContent = 'No word was detected. Please speak clearly and try again.';
                     break;
                 case 'network':
-                    speechStatus.textContent = 'Network error. Please check your connection.';
+                    speechStatus.textContent = 'Network error occurred. Please check your connection.';
                     break;
                 case 'not-allowed':
-                    speechStatus.textContent = 'Please allow microphone access to use speech recognition.';
+                case 'security':
+                    speechStatus.textContent = 'Microphone access denied. Please allow microphone access in your browser settings.';
+                    micButton.disabled = true;
                     break;
                 case 'aborted':
-                    speechStatus.textContent = 'Listening stopped. Click microphone to try again.';
+                    speechStatus.textContent = 'Listening was stopped. Click the microphone to try again.';
                     break;
                 default:
-                    speechStatus.textContent = 'Error occurred. Please try again.';
+                    speechStatus.textContent = `Error occurred: ${event.error}. Please try again.`;
             }
             micButton.classList.remove('listening');
             micButton.style.transform = 'scale(1)';
-            
+
             if (speechTimeout) {
                 clearTimeout(speechTimeout);
                 speechTimeout = null;
