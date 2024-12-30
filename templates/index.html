@@ -192,34 +192,36 @@
 
                     console.log('Speech recognized:', transcript, 'Confidence:', confidence);
 
-                    // Show confidence level more prominently
-                    const confidencePercent = Math.round(confidence * 100);
-                    speechStatus.textContent = `I heard: "${transcript}"\nConfidence: ${confidencePercent}%`;
+                    // Update input field immediately
+                    readingInput.value = transcript;
 
                     // Clean up both the transcript and current word for comparison
                     const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
                     const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
 
-                    readingInput.value = transcript;
-
-                    if (confidence < 0.5) {
-                        speechStatus.textContent += '\nLow confidence - Please speak more clearly and try again';
-                        return;
-                    }
-
                     // Show clear feedback about the word matching
                     if (cleanTranscript === cleanCurrentWord) {
-                        speechStatus.textContent += '\n✅ Perfect match!';
-                        checkWord();
+                        wordDisplay.textContent = '🌟 Correct! 🌟';
+                        rewardContainer.style.display = 'block';
+                        interactionItems.style.display = 'flex';
+                        speakWord("Great job! Choose your reward!");
+
+                        // Show confidence as additional info
+                        speechStatus.textContent = `Perfect match! (Confidence: ${Math.round(confidence * 100)}%)`;
+
+                        createParticles(
+                            puppy.getBoundingClientRect().left + puppy.getBoundingClientRect().width/2,
+                            puppy.getBoundingClientRect().top + puppy.getBoundingClientRect().height/2,
+                            'pet'
+                        );
                     } else {
                         wordDisplay.textContent = '❌ Try again!';
                         rewardContainer.style.display = 'none';
                         interactionItems.style.display = 'none';
                         speakWord("That's not quite right. Try again!");
 
-                        // Show clear comparison
-                        speechStatus.textContent += `\nExpected word: "${currentWord}"`;
-                        speechStatus.textContent += `\nThey don't match - Please try again`;
+                        // Show confidence as additional info
+                        speechStatus.textContent = `Not quite right. I heard "${transcript}" (Confidence: ${Math.round(confidence * 100)}%)`;
                     }
                 };
 
