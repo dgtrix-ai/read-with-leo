@@ -341,3 +341,44 @@ h2 {
   margin: 5px 0;
   text-shadow: 1px 1px 0px black;
 }
+
+/* Settings controls */
+.settings-controls {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 15px;
+  border-radius: 15px;
+  margin: 15px 0;
+  border: 3px dashed rgba(255, 255, 255, 0.5);
+}
+
+.settings-controls h3 {
+  font-size: 1.4rem;
+  color: #FFDE00;
+  margin: 10px 0;
+  text-shadow: 1px 1px 0px black;
+}
+
+.control-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.settings-toggle-btn {
+  padding: 12px 20px;
+  border-radius: 15px;
+  background: #00b4d8;
+  color: white;
+  font-weight: bold;
+  font-size: 1.3rem;
+  border: 3px solid white;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settings-toggle-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 7px 15px rgba(0,0,0,0.4);
+}

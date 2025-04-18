@@ -81,17 +81,22 @@
         <!-- Text input as backup -->
         <input type="text" class="reading-input" placeholder="Or type the word here..." autocomplete="off">
         
-        <!-- Next word button -->
-        <button class="next-word-btn">Next Word</button>
+        <!-- Control buttons -->
+        <div class="control-buttons">
+            <button class="next-word-btn">Next Word</button>
+            <button class="settings-toggle-btn">⚙️ Settings</button>
+        </div>
         
         <!-- Settings (hidden by default, shown with a settings button) -->
         <div class="settings-controls">
+            <h3>Difficulty</h3>
             <div class="difficulty-selector">
                 <button class="difficulty-btn easy active" data-difficulty="easy">Easy</button>
                 <button class="difficulty-btn medium" data-difficulty="medium">Medium</button>
                 <button class="difficulty-btn hard" data-difficulty="hard">Hard</button>
             </div>
             
+            <h3>Word Categories</h3>
             <div class="category-selector">
                 <button class="category-btn active" data-category="animals">Animals</button>
                 <button class="category-btn" data-category="colors">Colors</button>
@@ -438,7 +443,12 @@
         const stats = wordBank.getProgressStats();
         document.querySelector('.success-rate').textContent = `${Math.round(stats.successRate)}%`;
         document.querySelector('.consecutive-correct').textContent = stats.consecutiveCorrect;
-        document.querySelector('.review-count').textContent = stats.reviewQueueLength;
+        
+        // Only update review-count if it exists
+        const reviewCount = document.querySelector('.review-count');
+        if (reviewCount) {
+            reviewCount.textContent = stats.reviewQueueLength;
+        }
     }
 
     function updateWord() {
@@ -547,6 +557,20 @@
     speakWordBtn.addEventListener('click', () => {
         speechSynthesis.cancel();
         spellOutWord();
+    });
+    
+    // Settings toggle button
+    const settingsToggleBtn = document.querySelector('.settings-toggle-btn');
+    const settingsControls = document.querySelector('.settings-controls');
+    
+    settingsToggleBtn.addEventListener('click', () => {
+        if (settingsControls.style.display === 'none' || !settingsControls.style.display) {
+            settingsControls.style.display = 'block';
+            settingsToggleBtn.textContent = '✖️ Close Settings';
+        } else {
+            settingsControls.style.display = 'none';
+            settingsToggleBtn.textContent = '⚙️ Settings';
+        }
     });
 
     // Speech Synthesis Setup

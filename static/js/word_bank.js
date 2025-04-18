@@ -68,6 +68,14 @@ class WordBank {
             this.currentCategory = category;
         }
     }
+    
+    setDifficulty(difficulty) {
+        // This overrides the current difficulty level
+        if (['easy', 'medium', 'hard'].includes(difficulty)) {
+            this.progressTracker.currentLevel = difficulty;
+            this.progressTracker.saveProgress();
+        }
+    }
 
     getProgressStats() {
         return this.progressTracker.getProgressStats();
