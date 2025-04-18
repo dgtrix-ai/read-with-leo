@@ -1,25 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Read with Leo the Puppy! 🐕📚</title>
+    <title>Learn with Leo the Puppy! 🐕📚</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <style>
-    .mic-button.listening {
-        background: #ff4444;
-        animation: pulse 1.5s infinite;
-        box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
-        transform: scale(1.1);
-    }
-
-    @keyframes pulse {
-        0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 68, 68, 0.5); }
-        50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(255, 68, 68, 0.8); }
-        100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 68, 68, 0.5); }
-    }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <h1>Play with Leo! 🐕✨</h1>
+    <h1>Learn with Leo! 🐕✨</h1>
 
     <div class="stats-container">
         <div class="stats">
@@ -38,8 +25,9 @@
         </div>
     </div>
 
+    <!-- Puppy Container - The main character -->
     <div class="puppy-container">
-        <img src="Gemini_Generated_Image_mijuvdmijuvdmiju.jpeg" alt="Adorable toy poodle puppy with golden-brown fur and expressive eyes" class="puppy-image">
+        <img src="Gemini_Generated_Image_mijuvdmijuvdmiju.jpeg" alt="Leo the Puppy" class="puppy-image">
         <div class="video-container">
             <video id="petVideo" src="Standard_Mode_dog_licking_his_paw_.mp4" style="display: none"></video>
             <video id="playVideo" src="Standard_Mode_dog_playing___jumping.mp4" style="display: none"></video>
@@ -47,6 +35,7 @@
         </div>
     </div>
 
+    <!-- Reward options when answering correctly -->
     <div class="interaction-items">
         <div class="interaction-item" data-type="pet">
             <span>🤚</span> Pet Leo
@@ -59,54 +48,63 @@
         </div>
     </div>
 
+    <!-- Main learning container -->
     <div class="reading-container">
-        <h2 style="color: #ffd700; margin: 5px 0;">Spell with Leo! 📝</h2>
+        <h2>Spell with Leo! 📝</h2>
         
+        <!-- Simple stats display -->
         <div class="progress-stats">
             <div class="stat-item">
-                <span class="stat-icon">📈</span>
-                <span class="stat-label">Success Rate:</span>
+                <span class="stat-icon">⭐</span>
+                <span class="stat-label">Score:</span>
                 <span class="success-rate">0%</span>
             </div>
             <div class="stat-item">
-                <span class="stat-icon">🎯</span>
+                <span class="stat-icon">🔥</span>
                 <span class="stat-label">Streak:</span>
                 <span class="consecutive-correct">0</span>
             </div>
-            <div class="stat-item">
-                <span class="stat-icon">📚</span>
-                <span class="stat-label">Review Words:</span>
-                <span class="review-count">0</span>
-            </div>
         </div>
 
-        <div class="difficulty-selector">
-            <button class="difficulty-btn easy active" data-difficulty="easy">Easy</button>
-            <button class="difficulty-btn medium" data-difficulty="medium">Medium</button>
-            <button class="difficulty-btn hard" data-difficulty="hard">Hard</button>
-        </div>
-
-        <div class="category-selector">
-            <button class="category-btn active" data-category="animals">Animals</button>
-            <button class="category-btn" data-category="colors">Colors</button>
-            <button class="category-btn" data-category="numbers">Numbers</button>
-            <button class="category-btn" data-category="objects">Objects</button>
-            <button class="category-btn" data-category="food">Food</button>
-            <button class="category-btn" data-category="nature">Nature</button>
-        </div>
-
+        <!-- The word to spell - large display -->
         <div class="word-display">Ready to start!</div>
+        
+        <!-- Speech controls - simplified -->
         <div class="speech-container">
+            <div class="speech-status">Listen to the spelling and say the word!</div>
             <div class="button-group">
-                <button class="mic-button" title="Click to speak">🎤</button>
                 <button class="speak-word-btn" title="Hear spelling again">🔊</button>
+                <button class="mic-button" title="Click to speak">🎤</button>
             </div>
-            <div class="speech-status">Listen to the spelling and guess the word</div>
         </div>
-        <input type="text" class="reading-input" placeholder="Type the word after hearing it spelled..." autocomplete="off">
+        
+        <!-- Text input as backup -->
+        <input type="text" class="reading-input" placeholder="Or type the word here..." autocomplete="off">
+        
+        <!-- Next word button -->
         <button class="next-word-btn">Next Word</button>
+        
+        <!-- Settings (hidden by default, shown with a settings button) -->
+        <div class="settings-controls">
+            <div class="difficulty-selector">
+                <button class="difficulty-btn easy active" data-difficulty="easy">Easy</button>
+                <button class="difficulty-btn medium" data-difficulty="medium">Medium</button>
+                <button class="difficulty-btn hard" data-difficulty="hard">Hard</button>
+            </div>
+            
+            <div class="category-selector">
+                <button class="category-btn active" data-category="animals">Animals</button>
+                <button class="category-btn" data-category="colors">Colors</button>
+                <button class="category-btn" data-category="numbers">Numbers</button>
+                <button class="category-btn" data-category="objects">Objects</button>
+                <button class="category-btn" data-category="food">Food</button>
+                <button class="category-btn" data-category="nature">Nature</button>
+            </div>
+        </div>
+        
+        <!-- Success message -->
         <div class="reward-container">
-            <p style="color: #ffd700; margin: 10px 0;">Great job! Choose your reward:</p>
+            <p>Great job! Choose your reward:</p>
         </div>
     </div>
 
@@ -139,14 +137,17 @@
     let recognition = null;
     let speechTimeout = null;
 
+    // Hide the settings by default and add a toggle button
+    document.querySelector('.settings-controls').style.display = 'none';
+    
     // Browser compatibility check
     if (!('webkitSpeechRecognition' in window)) {
         console.warn('Speech recognition not supported in this browser');
-        speechStatus.textContent = 'Speech recognition is not supported in your browser. Please try typing instead.';
+        speechStatus.textContent = 'Speech recognition not available. Just type the word!';
         micButton.disabled = true;
         micButton.style.opacity = '0.5';
     } else {
-        // Initialize Speech Recognition with debug logging
+        // Initialize Speech Recognition with simplified interface for children
         if (!recognition) {
             try {
                 recognition = new webkitSpeechRecognition();
@@ -159,14 +160,21 @@
                 recognition.onstart = () => {
                     console.log('Speech recognition started');
                     micButton.classList.add('listening');
-                    speechStatus.textContent = 'Listening... Say the word you see';
+                    speechStatus.textContent = 'I\'m listening! Say the word...';
                     micButton.style.transform = 'scale(1.1)';
+                    
+                    // Create some visual effects when listening
+                    createParticles(
+                        micButton.getBoundingClientRect().left + micButton.getBoundingClientRect().width/2,
+                        micButton.getBoundingClientRect().top + micButton.getBoundingClientRect().height/2,
+                        'mic'
+                    );
 
                     // Add timeout after 5 seconds of no speech
                     speechTimeout = setTimeout(() => {
                         if (micButton.classList.contains('listening')) {
                             recognition.stop();
-                            speechStatus.textContent = 'No speech detected. Please try again.';
+                            speechStatus.textContent = 'Try again! Press the mic button 🎤';
                         }
                     }, 5000);
                 };
@@ -174,7 +182,7 @@
                 recognition.onend = () => {
                     console.log('Speech recognition ended');
                     micButton.classList.remove('listening');
-                    speechStatus.textContent = 'Listen to the spelling and guess the word';
+                    speechStatus.textContent = 'Press the mic button 🎤 to say the word!';
                     micButton.style.transform = 'scale(1)';
                     if (speechTimeout) {
                         clearTimeout(speechTimeout);
@@ -199,54 +207,70 @@
                     const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
                     const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
 
-                    // Show clear feedback about the word matching
-                    if (cleanTranscript === cleanCurrentWord) {
+                    // For children, be more lenient with word matching
+                    // Check if the spoken word is close enough to the correct word
+                    const isMatch = cleanTranscript === cleanCurrentWord || 
+                                  (cleanTranscript.includes(cleanCurrentWord) || 
+                                   cleanCurrentWord.includes(cleanTranscript)) &&
+                                  Math.abs(cleanTranscript.length - cleanCurrentWord.length) <= 2;
+
+                    if (isMatch) {
+                        wordBank.recordAttempt(currentWord, true);
+                        updateProgressDisplay();
+                        
+                        // Show large, exciting success feedback
                         wordDisplay.textContent = '🌟 Correct! 🌟';
+                        wordDisplay.style.color = '#FFDE00';
+                        
+                        // Display reward options
                         rewardContainer.style.display = 'block';
                         interactionItems.style.display = 'flex';
+                        
+                        // Congratulate the child
                         speakWord("Great job! Choose your reward!");
 
-                        // Show confidence as additional info
-                        speechStatus.textContent = `Perfect match! (Confidence: ${Math.round(confidence * 100)}%)`;
-
-                        createParticles(
-                            puppy.getBoundingClientRect().left + puppy.getBoundingClientRect().width/2,
-                            puppy.getBoundingClientRect().top + puppy.getBoundingClientRect().height/2,
-                            'pet'
-                        );
+                        // Create celebration effects
+                        for (let i = 0; i < 3; i++) {
+                            setTimeout(() => {
+                                createParticles(
+                                    puppy.getBoundingClientRect().left + puppy.getBoundingClientRect().width/2,
+                                    puppy.getBoundingClientRect().top + puppy.getBoundingClientRect().height/2,
+                                    'pet'
+                                );
+                            }, i * 300);
+                        }
+                        
+                        // Simple feedback for children
+                        speechStatus.textContent = `Great job! You said it right!`;
                     } else {
-                        wordDisplay.textContent = '❌ Try again!';
+                        wordBank.recordAttempt(currentWord, false);
+                        updateProgressDisplay();
+                        
+                        // Show gentle correction
+                        wordDisplay.textContent = 'Try again!';
+                        wordDisplay.style.color = '#ffffff';
+                        
+                        // Hide reward options
                         rewardContainer.style.display = 'none';
                         interactionItems.style.display = 'none';
-                        speakWord("That's not quite right. Try again!");
+                        
+                        // Encourage retry
+                        speakWord("Let's try again! Listen carefully.");
+                        setTimeout(() => {
+                            spellOutWord();
+                        }, 1500);
 
-                        // Show confidence as additional info
-                        speechStatus.textContent = `Not quite right. I heard "${transcript}" (Confidence: ${Math.round(confidence * 100)}%)`;
+                        // Simple feedback for children
+                        speechStatus.textContent = `Not quite. Listen carefully and try again!`;
                     }
                 };
 
                 recognition.onerror = (event) => {
                     console.error('Speech recognition error:', event.error);
-                    switch(event.error) {
-                        case 'no-speech':
-                            speechStatus.textContent = 'No word was detected. Please speak clearly and try again.';
-                            break;
-                        case 'network':
-                            speechStatus.textContent = 'Network error occurred. Please check your connection.';
-                            break;
-                        case 'not-allowed':
-                        case 'security':
-                            speechStatus.textContent = 'Microphone access denied. Please allow microphone access in your browser settings.';
-                            micButton.disabled = true;
-                            break;
-                        case 'aborted':
-                            speechStatus.textContent = 'Listening was stopped. Click the microphone to try again.';
-                            break;
-                        default:
-                            speechStatus.textContent = `Error occurred: ${event.error}. Please try again.`;
-                    }
+                    
+                    // Simplified error messages for children
+                    speechStatus.textContent = "I couldn't hear you. Try again!";
                     micButton.classList.remove('listening');
-                    micButton.style.transform = 'scale(1)';
 
                     if (speechTimeout) {
                         clearTimeout(speechTimeout);
@@ -255,7 +279,8 @@
                 };
             } catch (error) {
                 console.error('Error initializing speech recognition:', error);
-                speechStatus.textContent = 'Speech recognition initialization failed. Please try reloading.';
+                speechStatus.textContent = "Something went wrong. Try typing instead!";
+                micButton.disabled = true;
             }
         }
     }
@@ -277,17 +302,39 @@
         const particles = {
             'pet': ['💖', '✨', '💫'],
             'play': ['🎾', '⚡', '🌟'],
-            'treat': ['🦴', '❤️', '🍖']
+            'treat': ['🦴', '❤️', '🍖'],
+            'mic': ['🎤', '🔊', '👂', '🗣️'],
+            'correct': ['🎉', '⭐', '🌟', '👏', '🎊']
         };
         
         const emojis = particles[type] || particles.pet;
+        const count = type === 'correct' ? 12 : 6;
         
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < count; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-            particle.style.left = `${x + (Math.random() - 0.5) * 100}px`;
-            particle.style.top = `${y + (Math.random() - 0.5) * 100}px`;
+            
+            // Different behavior for different particle types
+            if (type === 'mic') {
+                // Mic particles move in a circular pattern
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 30 + Math.random() * 20;
+                particle.style.left = `${x + Math.cos(angle) * distance}px`;
+                particle.style.top = `${y + Math.sin(angle) * distance}px`;
+                particle.style.fontSize = '1.2rem';
+            } else if (type === 'correct') {
+                // Celebration particles cover more area
+                particle.style.left = `${x + (Math.random() - 0.5) * 200}px`;
+                particle.style.top = `${y + (Math.random() - 0.5) * 200}px`;
+                particle.style.fontSize = '1.8rem';
+            } else {
+                // Standard particles
+                particle.style.left = `${x + (Math.random() - 0.5) * 100}px`;
+                particle.style.top = `${y + (Math.random() - 0.5) * 100}px`;
+                particle.style.fontSize = '1.5rem';
+            }
+            
             document.body.appendChild(particle);
             setTimeout(() => particle.remove(), 1500);
         }

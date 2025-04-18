@@ -1,28 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
 
 body {
   margin: 0;
   padding: 5px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1d24 0%, #2c3037 100%);
-  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #3a86ff 0%, #8338ec 100%);
+  font-family: 'Comic Neue', cursive;
   display: flex;
   flex-direction: column;
   align-items: center;
   color: #ffffff;
-  gap: 5px;
+  gap: 10px;
   overflow-x: hidden;
 }
 
 h1 {
-  font-size: 1.8rem;
-  font-weight: 600;
+  font-size: 2.2rem;
+  font-weight: 700;
   text-align: center;
-  margin: 0.5rem 0;
-  background: linear-gradient(45deg, #ffd700, #ffa726);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.2));
+  margin: 0.8rem 0;
+  color: #ffbe0b;
+  text-shadow: 2px 2px 0px #000000, 4px 4px 0px rgba(0,0,0,0.2);
 }
 
 .puppy-container {
@@ -67,48 +65,55 @@ h1 {
 
 .interaction-items {
   display: none;
-  gap: 12px;
-  margin: 5px 0;
+  gap: 15px;
+  margin: 10px 0;
+  justify-content: center;
 }
 
 .interaction-item {
   cursor: pointer;
-  padding: 8px 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 3px solid white;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 500;
-  font-size: 0.85rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: white;
 }
 
-.reading-container {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 15px;
-  margin: 5px 0;
-  width: 80%;
-  max-width: 500px;
-  text-align: center;
-  position: relative;
-  z-index: 0;
+.interaction-item:hover {
+  transform: scale(1.1);
+  background: #ff9e00;
 }
+
+.interaction-item span {
+  font-size: 1.5rem;
+}
+
+.settings-controls {
+  margin-top: 20px;
+  padding: 15px;
+  border-top: 2px dashed rgba(255, 255, 255, 0.3);
+}
+
+/* Reading container styles in one place */
 
 .word-display {
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: #ffd700;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  margin: 10px 0;
-  min-height: 45px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #000000;
+  margin: 15px 0;
+  min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  letter-spacing: 4px;
+  letter-spacing: 8px;
 }
 
 .progress-stats {
@@ -147,20 +152,192 @@ h1 {
     color: #ffd700;
 }
 
-.difficulty-btn.active {
-    transform: scale(1.1);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    position: relative;
+.reading-container {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 10px 0;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  position: relative;
+  z-index: 0;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+  border: 3px solid white;
 }
 
-.difficulty-btn.active::after {
-    content: '👉';
-    position: absolute;
-    right: -25px;
-    animation: bounce 0.5s infinite alternate;
+.mic-button, .speak-word-btn {
+  font-size: 2rem;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #ff5e5b;
+  color: white;
+  border: 4px solid white;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mic-button:hover, .speak-word-btn:hover {
+  transform: scale(1.1);
+}
+
+.mic-button.listening {
+  background: #ff0000;
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+}
+
+.difficulty-btn, .category-btn {
+  padding: 10px 15px;
+  margin: 5px;
+  border-radius: 15px;
+  background: #ffbe0b;
+  color: #000;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border: 3px solid white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.difficulty-btn:hover, .category-btn:hover {
+  transform: scale(1.05);
+}
+
+.difficulty-btn.active, .category-btn.active {
+  transform: scale(1.1);
+  background: #00f5d4;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+  position: relative;
+}
+
+.difficulty-btn.active::after, .category-btn.active::after {
+  content: '👈';
+  position: absolute;
+  left: -25px;
+  animation: bounce 0.5s infinite alternate;
+}
+
+.next-word-btn {
+  padding: 12px 20px;
+  margin: 15px;
+  border-radius: 15px;
+  background: #ff5e5b;
+  color: white;
+  font-weight: bold;
+  font-size: 1.3rem;
+  border: 3px solid white;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.next-word-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 7px 15px rgba(0,0,0,0.4);
+}
+
+.reading-input {
+  padding: 12px 20px;
+  border-radius: 15px;
+  font-size: 1.3rem;
+  margin: 10px;
+  border: 3px solid white;
+  width: 80%;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  font-family: 'Comic Neue', cursive;
+}
+
+.speech-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.speech-status {
+  font-size: 1.1rem;
+  margin: 10px 0;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 0px black;
 }
 
 @keyframes bounce {
-    from { transform: translateX(0); }
-    to { transform: translateX(5px); }
+  from { transform: translateX(0); }
+  to { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.7); }
+  50% { transform: scale(1.15); box-shadow: 0 0 25px rgba(255, 0, 0, 0.9); }
+  100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.7); }
+}
+
+/* Animation for particles */
+.particle {
+  position: absolute;
+  z-index: 100;
+  user-select: none;
+  pointer-events: none;
+  animation: float-up 1.5s ease-out forwards;
+  opacity: 1;
+  font-size: 1.5rem;
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(0) scale(0.5);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(1.2) rotate(10deg);
+    opacity: 0;
+  }
+}
+
+/* Style for h2 elements */
+h2 {
+  font-size: 1.8rem;
+  color: #FFDE00;
+  text-shadow: 1px 1px 0px black;
+  margin: 15px 0;
+}
+
+/* Style for reward container */
+.reward-container {
+  display: none;
+  background: rgba(255,255,255,0.2);
+  padding: 15px;
+  border-radius: 15px;
+  margin: 10px 0;
+  border: 2px dashed white;
+}
+
+.reward-container p {
+  font-size: 1.3rem;
+  color: #FFFFFF;
+  font-weight: bold;
+  margin: 5px 0;
+  text-shadow: 1px 1px 0px black;
 }
