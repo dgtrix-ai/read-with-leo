@@ -76,12 +76,36 @@ class SpeechHelper {
     start() {
         if (!this.recognition) {
             if (!this.initialize()) {
+                // If speech recognition can't be initialized, show a message
+                // to encourage the child to type instead
+                this.statusElement.textContent = "Let's use typing today! Type the word.";
+                
+                // Focus the input field to make it obvious
+                setTimeout(() => {
+                    const inputs = document.querySelectorAll('input[type="text"]');
+                    if (inputs.length > 0) {
+                        inputs[0].focus();
+                    }
+                }, 1000);
                 return;
             }
         }
         
-        console.log('Started new recognition');
-        this.recognition.start();
+        try {
+            console.log('Started new recognition');
+            this.recognition.start();
+        } catch (error) {
+            console.error('Error starting recognition:', error);
+            this.statusElement.textContent = "Let's use typing today! Type the word.";
+            
+            // Focus the input field
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('input[type="text"]');
+                if (inputs.length > 0) {
+                    inputs[0].focus();
+                }
+            }, 1000);
+        }
     }
     
     /**
@@ -161,8 +185,31 @@ class SpeechHelper {
     handleError(event) {
         console.error('Speech recognition error:', event.error);
         
-        // Simplified error messages for children
-        this.statusElement.textContent = "I couldn't hear you. Try again!";
+        // Simplified error messages for children based on error type
+        let message = "I couldn't hear you. Try again!";
+        
+        // Handle specific error types with child-friendly messages
+        switch (event.error) {
+            case 'network':
+                message = "I can't hear you right now. Please try again!";
+                // Try to reinitialize after a short delay
+                setTimeout(() => this.initialize(), 2000);
+                break;
+            case 'not-allowed':
+                message = "I need permission to listen! Please allow your microphone.";
+                break;
+            case 'aborted':
+                message = "Let's try again! Press the mic button.";
+                break;
+            case 'audio-capture':
+                message = "I can't find your microphone. Is it connected?";
+                break;
+            case 'no-speech':
+                message = "I didn't hear anything. Please speak a little louder!";
+                break;
+        }
+        
+        this.statusElement.textContent = message;
         this.micButton.classList.remove('listening');
 
         if (this.speechTimeout) {

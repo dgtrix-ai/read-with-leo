@@ -535,66 +535,40 @@
     // Event Listeners for Speech Features
     micButton.addEventListener('click', () => {
         console.log('Mic button clicked');
-        if (recognition) {
-            // First, remove any auto-listening classes
-            micButton.classList.remove('auto-listening');
+        
+        // We're using our speechHelper utility class to handle speech recognition
+        if (speechHelper) {
+            // Stop any existing speech recognition
+            speechHelper.stop();
             
-            // Always stop any existing recognition to ensure clean state
-            try {
-                recognition.stop();
-                console.log('Stopped existing recognition');
-            } catch (e) {
-                // Handle case where recognition wasn't running
-                console.log('No active recognition to stop');
-            }
-            
-            // Clear speech timeout if it exists
-            if (speechTimeout) {
-                clearTimeout(speechTimeout);
-                speechTimeout = null;
-            }
-            
-            // Wait a moment before starting new recognition
+            // Small delay to ensure clean start
             setTimeout(() => {
-                try {
-                    // Apply visual feedback that we're listening
-                    micButton.classList.add('listening');
-                    speechStatus.textContent = "I'm listening! Say the word...";
-                    
-                    // Create visual effects to draw attention
-                    createParticles(
-                        micButton.getBoundingClientRect().left + micButton.getBoundingClientRect().width/2,
-                        micButton.getBoundingClientRect().top + micButton.getBoundingClientRect().height/2,
-                        'mic'
-                    );
-                    
-                    // Start recognition
-                    recognition.start();
-                    console.log('Started new recognition');
-                    
-                    // Set timeout for automatic stopping if no speech detected
-                    speechTimeout = setTimeout(() => {
-                        if (micButton.classList.contains('listening')) {
-                            recognition.stop();
-                            speechStatus.textContent = 'Try again! Press the mic button 🎤';
-                        }
-                    }, 5000);
-                } catch (e) {
-                    console.error('Error starting recognition:', e);
-                    // Try recreating the recognition object
-                    setTimeout(() => {
-                        initSpeechRecognition();
-                        micButton.click();
-                    }, 500);
-                }
+                // Start new recognition
+                speechHelper.start();
+                
+                // Create visual effects around the mic button for better user feedback
+                // (This is handled internally by the speechHelper, but we add extra particles for fun)
+                ParticleEffects.createParticlesAroundElement(micButton, 'mic');
             }, 300);
         } else {
-            alert('Speech recognition is not supported in your browser.');
+            // Try to initialize the speech recognition again
+            initSpeechRecognition();
+            
+            // If it's now available, use it
+            if (speechHelper) {
+                speechHelper.start();
+            } else {
+                // Friendly message for children when speech doesn't work
+                speechStatus.textContent = "Let's use typing today! Type the word.";
+                readingInput.focus();
+            }
         }
     });
 
     speakWordBtn.addEventListener('click', () => {
-        speechSynthesis.cancel();
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
         spellOutWord();
     });
     
