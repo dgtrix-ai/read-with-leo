@@ -172,8 +172,14 @@
     
     // Handle speech recognition results
     function handleSpeechResult(transcript, confidence) {
+        // Add a debug log to see if this function is being called
+        console.log("handleSpeechResult called with:", transcript, confidence);
+        
         // Update input field immediately
         readingInput.value = transcript;
+        
+        // Use checkWord to handle the verification against the current word
+        checkWord();
         
         // Use our WordMatcher utility to compare the spoken word with the target
         const result = WordMatcher.compareWords(transcript, currentWord);
