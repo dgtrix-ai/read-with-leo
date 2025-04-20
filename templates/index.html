@@ -161,8 +161,9 @@
             recognition = null;
         }
         
-        // Browser compatibility check
-        if (!('webkitSpeechRecognition' in window)) {
+        // Browser compatibility check for both standard and webkit versions
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
             console.warn('Speech recognition not supported in this browser');
             speechStatus.textContent = 'Speech recognition not available. Just type the word!';
             micButton.disabled = true;
@@ -172,7 +173,7 @@
         
         try {
             // Create a new speech recognition instance
-            recognition = new webkitSpeechRecognition();
+            recognition = new SpeechRecognition();
             recognition.continuous = false;
             recognition.interimResults = false;
             recognition.lang = 'en-US';
@@ -369,11 +370,14 @@
                     speechTimeout = null;
                 }
             };
-            } catch (error) {
-                console.error('Error initializing speech recognition:', error);
-                speechStatus.textContent = "Something went wrong. Try typing instead!";
-                micButton.disabled = true;
-            }
+            
+            return true; // Successfully initialized
+            
+        } catch (error) {
+            console.error('Error initializing speech recognition:', error);
+            speechStatus.textContent = "Something went wrong. Try typing instead!";
+            micButton.disabled = true;
+            return false;
         }
     }
 
