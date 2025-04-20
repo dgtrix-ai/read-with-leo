@@ -594,7 +594,17 @@
     micButton.addEventListener('click', () => {
         console.log('Mic button clicked');
         if (recognition) {
-            recognition.start();
+            // Check if recognition is already active
+            if (micButton.classList.contains('listening') || micButton.classList.contains('auto-listening')) {
+                console.log('Recognition already active, stopping first');
+                recognition.stop();
+                // Wait a moment before restarting
+                setTimeout(() => {
+                    recognition.start();
+                }, 300);
+            } else {
+                recognition.start();
+            }
         } else {
             alert('Speech recognition is not supported in your browser.');
         }
