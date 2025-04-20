@@ -209,21 +209,45 @@
                     readingInput.value = transcript;
 
                     // Clean up both the transcript and current word for comparison
-                    // For young children, be very lenient with matching
+                    // For young children, be EXTREMELY lenient with matching
                     const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
                     const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
                     
-                    // Use a more lenient matching algorithm for children
+                    console.log('Comparing:', cleanTranscript, 'with target word:', cleanCurrentWord);
+                    
+                    // Use a VERY forgiving matching algorithm designed specifically for children
                     // 1. Exact match
                     // 2. If the transcript contains the word (e.g., "a duck" for "duck")
-                    // 3. If the first letters match and lengths are similar
+                    // 3. If the transcript is contained in the word (e.g., "do" for "dog")
+                    // 4. If the first letter matches and was spoken clearly (for very short words)
+                    // 5. Using Levenshtein distance to allow for child pronunciation errors
+                    
                     const exactMatch = cleanTranscript === cleanCurrentWord;
                     const containsMatch = cleanTranscript.includes(cleanCurrentWord);
-                    const similarStartMatch = cleanCurrentWord.length > 2 && 
-                                           cleanTranscript.startsWith(cleanCurrentWord.substring(0, 2)) &&
-                                           Math.abs(cleanTranscript.length - cleanCurrentWord.length) <= 2;
+                    const reverseContainsMatch = cleanCurrentWord.includes(cleanTranscript) && cleanTranscript.length > 1;
+                    const firstLetterMatch = cleanCurrentWord.length <= 3 && cleanTranscript.charAt(0) === cleanCurrentWord.charAt(0);
                     
-                    const isMatch = exactMatch || containsMatch || similarStartMatch;
+                    // Calculate letter matching percentage for more forgiving comparison
+                    let matchCount = 0;
+                    const minLength = Math.min(cleanTranscript.length, cleanCurrentWord.length);
+                    for (let i = 0; i < minLength; i++) {
+                        if (cleanTranscript.charAt(i) === cleanCurrentWord.charAt(i)) {
+                            matchCount++;
+                        }
+                    }
+                    const percentMatch = minLength > 0 ? matchCount / minLength : 0;
+                    const goodEnoughMatch = percentMatch >= 0.5 && minLength > 1;
+                    
+                    console.log('Match details:', {
+                        exactMatch, 
+                        containsMatch, 
+                        reverseContainsMatch, 
+                        firstLetterMatch, 
+                        percentMatch, 
+                        goodEnoughMatch
+                    });
+                    
+                    const isMatch = exactMatch || containsMatch || reverseContainsMatch || firstLetterMatch || goodEnoughMatch;
 
                     if (isMatch) {
                         wordBank.recordAttempt(currentWord, true);
@@ -267,27 +291,50 @@
                         wordBank.recordAttempt(currentWord, false);
                         updateProgressDisplay();
                         
-                        // Show gentle correction - make it very supportive
-                        wordDisplay.textContent = '💪 Almost there!';
+                        // For children, don't emphasize "incorrect" too much
+                        // We want them to feel encouraged to try again
+                        
+                        // Calculate how close they were to encourage improvement
+                        let encouragementMessage = '';
+                        if (percentMatch >= 0.3) {
+                            // They were pretty close
+                            encouragementMessage = `You're so close! The word is ${currentWord}.`;
+                            wordDisplay.textContent = '💪 Almost there!';
+                        } else {
+                            // They need more guidance
+                            encouragementMessage = `Let's try again! The word is ${currentWord}.`;
+                            wordDisplay.textContent = '🔊 Listen one more time!';
+                        }
+                        
                         wordDisplay.style.color = '#ffffff';
                         
                         // Hide reward options
                         rewardContainer.style.display = 'none';
                         interactionItems.style.display = 'none';
                         
-                        // Provide encouraging feedback
-                        speakWord("That was a great try! Let's hear the word again.");
+                        // Provide VERY encouraging feedback with the correct word
+                        speakWord(encouragementMessage);
                         
-                        // Gentle visual feedback
+                        // Gentle visual feedback - puppy is supportive
                         puppy.classList.add('encouraging-wiggle');
                         setTimeout(() => {
                             puppy.classList.remove('encouraging-wiggle');
-                            // Spell out the word again automatically after a short delay
-                            spellOutWord();
+                            // Spell out the word again automatically after a delay
+                            setTimeout(() => {
+                                spellOutWord();
+                                
+                                // Automatically activate the mic again after spelling out
+                                setTimeout(() => {
+                                    if (recognition) {
+                                        recognition.start();
+                                    }
+                                }, 4000); // Wait after spelling completes
+                                
+                            }, 1000);
                         }, 1500);
 
                         // Simple supportive feedback for children
-                        speechStatus.textContent = `Good try! Let's hear it one more time!`;
+                        speechStatus.textContent = `Good try! You can do it! 💪`;
                     }
                 };
 
