@@ -615,6 +615,19 @@
     // Speech Synthesis Setup
     // Using our speech utility for text-to-speech functionality
     let speechHelper;
+    
+    // We need to keep a speakWord function for backward compatibility
+    function speakWord(text, rate = 0.9, pitch = 1.0) {
+        // Call the original function from our utility class
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = rate;
+            utterance.pitch = pitch;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
 
     // Initialize speech recognition
     initSpeechRecognition();
