@@ -231,144 +231,144 @@
                 // For young children, be EXTREMELY lenient with matching
                 const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
                 const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
-                    
-                    console.log('Comparing:', cleanTranscript, 'with target word:', cleanCurrentWord);
-                    
-                    // Use a VERY forgiving matching algorithm designed specifically for children
-                    // 1. Exact match
-                    // 2. If the transcript contains the word (e.g., "a duck" for "duck")
-                    // 3. If the transcript is contained in the word (e.g., "do" for "dog")
-                    // 4. If the first letter matches and was spoken clearly (for very short words)
-                    // 5. Using Levenshtein distance to allow for child pronunciation errors
-                    
-                    const exactMatch = cleanTranscript === cleanCurrentWord;
-                    const containsMatch = cleanTranscript.includes(cleanCurrentWord);
-                    const reverseContainsMatch = cleanCurrentWord.includes(cleanTranscript) && cleanTranscript.length > 1;
-                    const firstLetterMatch = cleanCurrentWord.length <= 3 && cleanTranscript.charAt(0) === cleanCurrentWord.charAt(0);
-                    
-                    // Calculate letter matching percentage for more forgiving comparison
-                    let matchCount = 0;
-                    const minLength = Math.min(cleanTranscript.length, cleanCurrentWord.length);
-                    for (let i = 0; i < minLength; i++) {
-                        if (cleanTranscript.charAt(i) === cleanCurrentWord.charAt(i)) {
-                            matchCount++;
-                        }
+                
+                console.log('Comparing:', cleanTranscript, 'with target word:', cleanCurrentWord);
+                
+                // Use a VERY forgiving matching algorithm designed specifically for children
+                // 1. Exact match
+                // 2. If the transcript contains the word (e.g., "a duck" for "duck")
+                // 3. If the transcript is contained in the word (e.g., "do" for "dog")
+                // 4. If the first letter matches and was spoken clearly (for very short words)
+                // 5. Using Levenshtein distance to allow for child pronunciation errors
+                
+                const exactMatch = cleanTranscript === cleanCurrentWord;
+                const containsMatch = cleanTranscript.includes(cleanCurrentWord);
+                const reverseContainsMatch = cleanCurrentWord.includes(cleanTranscript) && cleanTranscript.length > 1;
+                const firstLetterMatch = cleanCurrentWord.length <= 3 && cleanTranscript.charAt(0) === cleanCurrentWord.charAt(0);
+                
+                // Calculate letter matching percentage for more forgiving comparison
+                let matchCount = 0;
+                const minLength = Math.min(cleanTranscript.length, cleanCurrentWord.length);
+                for (let i = 0; i < minLength; i++) {
+                    if (cleanTranscript.charAt(i) === cleanCurrentWord.charAt(i)) {
+                        matchCount++;
                     }
-                    const percentMatch = minLength > 0 ? matchCount / minLength : 0;
-                    const goodEnoughMatch = percentMatch >= 0.5 && minLength > 1;
+                }
+                const percentMatch = minLength > 0 ? matchCount / minLength : 0;
+                const goodEnoughMatch = percentMatch >= 0.5 && minLength > 1;
+                
+                console.log('Match details:', {
+                    exactMatch, 
+                    containsMatch, 
+                    reverseContainsMatch, 
+                    firstLetterMatch, 
+                    percentMatch, 
+                    goodEnoughMatch
+                });
+                
+                const isMatch = exactMatch || containsMatch || reverseContainsMatch || firstLetterMatch || goodEnoughMatch;
+
+                if (isMatch) {
+                    wordBank.recordAttempt(currentWord, true);
+                    updateProgressDisplay();
                     
-                    console.log('Match details:', {
-                        exactMatch, 
-                        containsMatch, 
-                        reverseContainsMatch, 
-                        firstLetterMatch, 
-                        percentMatch, 
-                        goodEnoughMatch
+                    // Show large, exciting success feedback with animation
+                    wordDisplay.innerHTML = '🌟 <span class="success-text">Correct!</span> 🌟';
+                    wordDisplay.style.color = '#FFDE00';
+                    
+                    // Immediately display reward options
+                    rewardContainer.style.display = 'block';
+                    interactionItems.style.display = 'flex';
+                    
+                    // Congratulate the child with enthusiastic voice
+                    speakWord("Fantastic! You did it! Choose your reward!");
+
+                    // Create large celebration effects around the puppy
+                    createParticles(
+                        puppy.getBoundingClientRect().left + puppy.getBoundingClientRect().width/2,
+                        puppy.getBoundingClientRect().top + puppy.getBoundingClientRect().height/2,
+                        'correct'
+                    );
+                    
+                    // Animate the puppy with excitement
+                    puppy.classList.add('happy-bounce');
+                    setTimeout(() => {
+                        puppy.classList.remove('happy-bounce');
+                    }, 1500);
+                    
+                    // Simple encouraging feedback for children
+                    speechStatus.textContent = `Amazing job! You're so smart! 🎉`;
+                    
+                    // Pulse effect on reward options to draw attention
+                    interactionItems.querySelectorAll('.interaction-item').forEach(item => {
+                        item.classList.add('reward-attention');
+                        setTimeout(() => {
+                            item.classList.remove('reward-attention');
+                        }, 2000);
                     });
+                } else {
+                    wordBank.recordAttempt(currentWord, false);
+                    updateProgressDisplay();
                     
-                    const isMatch = exactMatch || containsMatch || reverseContainsMatch || firstLetterMatch || goodEnoughMatch;
-
-                    if (isMatch) {
-                        wordBank.recordAttempt(currentWord, true);
-                        updateProgressDisplay();
-                        
-                        // Show large, exciting success feedback with animation
-                        wordDisplay.innerHTML = '🌟 <span class="success-text">Correct!</span> 🌟';
-                        wordDisplay.style.color = '#FFDE00';
-                        
-                        // Immediately display reward options
-                        rewardContainer.style.display = 'block';
-                        interactionItems.style.display = 'flex';
-                        
-                        // Congratulate the child with enthusiastic voice
-                        speakWord("Fantastic! You did it! Choose your reward!");
-
-                        // Create large celebration effects around the puppy
-                        createParticles(
-                            puppy.getBoundingClientRect().left + puppy.getBoundingClientRect().width/2,
-                            puppy.getBoundingClientRect().top + puppy.getBoundingClientRect().height/2,
-                            'correct'
-                        );
-                        
-                        // Animate the puppy with excitement
-                        puppy.classList.add('happy-bounce');
-                        setTimeout(() => {
-                            puppy.classList.remove('happy-bounce');
-                        }, 1500);
-                        
-                        // Simple encouraging feedback for children
-                        speechStatus.textContent = `Amazing job! You're so smart! 🎉`;
-                        
-                        // Pulse effect on reward options to draw attention
-                        interactionItems.querySelectorAll('.interaction-item').forEach(item => {
-                            item.classList.add('reward-attention');
-                            setTimeout(() => {
-                                item.classList.remove('reward-attention');
-                            }, 2000);
-                        });
+                    // For children, don't emphasize "incorrect" too much
+                    // We want them to feel encouraged to try again
+                    
+                    // Calculate how close they were to encourage improvement
+                    let encouragementMessage = '';
+                    if (percentMatch >= 0.3) {
+                        // They were pretty close
+                        encouragementMessage = `You're so close! The word is ${currentWord}.`;
+                        wordDisplay.textContent = '💪 Almost there!';
                     } else {
-                        wordBank.recordAttempt(currentWord, false);
-                        updateProgressDisplay();
-                        
-                        // For children, don't emphasize "incorrect" too much
-                        // We want them to feel encouraged to try again
-                        
-                        // Calculate how close they were to encourage improvement
-                        let encouragementMessage = '';
-                        if (percentMatch >= 0.3) {
-                            // They were pretty close
-                            encouragementMessage = `You're so close! The word is ${currentWord}.`;
-                            wordDisplay.textContent = '💪 Almost there!';
-                        } else {
-                            // They need more guidance
-                            encouragementMessage = `Let's try again! The word is ${currentWord}.`;
-                            wordDisplay.textContent = '🔊 Listen one more time!';
-                        }
-                        
-                        wordDisplay.style.color = '#ffffff';
-                        
-                        // Hide reward options
-                        rewardContainer.style.display = 'none';
-                        interactionItems.style.display = 'none';
-                        
-                        // Provide VERY encouraging feedback with the correct word
-                        speakWord(encouragementMessage);
-                        
-                        // Gentle visual feedback - puppy is supportive
-                        puppy.classList.add('encouraging-wiggle');
-                        setTimeout(() => {
-                            puppy.classList.remove('encouraging-wiggle');
-                            // Spell out the word again automatically after a delay
-                            setTimeout(() => {
-                                spellOutWord();
-                                
-                                // Automatically activate the mic again after spelling out
-                                setTimeout(() => {
-                                    if (recognition) {
-                                        recognition.start();
-                                    }
-                                }, 4000); // Wait after spelling completes
-                                
-                            }, 1000);
-                        }, 1500);
-
-                        // Simple supportive feedback for children
-                        speechStatus.textContent = `Good try! You can do it! 💪`;
+                        // They need more guidance
+                        encouragementMessage = `Let's try again! The word is ${currentWord}.`;
+                        wordDisplay.textContent = '🔊 Listen one more time!';
                     }
-                };
-
-                recognition.onerror = (event) => {
-                    console.error('Speech recognition error:', event.error);
                     
-                    // Simplified error messages for children
-                    speechStatus.textContent = "I couldn't hear you. Try again!";
-                    micButton.classList.remove('listening');
+                    wordDisplay.style.color = '#ffffff';
+                    
+                    // Hide reward options
+                    rewardContainer.style.display = 'none';
+                    interactionItems.style.display = 'none';
+                    
+                    // Provide VERY encouraging feedback with the correct word
+                    speakWord(encouragementMessage);
+                    
+                    // Gentle visual feedback - puppy is supportive
+                    puppy.classList.add('encouraging-wiggle');
+                    setTimeout(() => {
+                        puppy.classList.remove('encouraging-wiggle');
+                        // Spell out the word again automatically after a delay
+                        setTimeout(() => {
+                            spellOutWord();
+                            
+                            // Automatically activate the mic again after spelling out
+                            setTimeout(() => {
+                                if (recognition) {
+                                    recognition.start();
+                                }
+                            }, 4000); // Wait after spelling completes
+                            
+                        }, 1000);
+                    }, 1500);
 
-                    if (speechTimeout) {
-                        clearTimeout(speechTimeout);
-                        speechTimeout = null;
-                    }
-                };
+                    // Simple supportive feedback for children
+                    speechStatus.textContent = `Good try! You can do it! 💪`;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                
+                // Simplified error messages for children
+                speechStatus.textContent = "I couldn't hear you. Try again!";
+                micButton.classList.remove('listening');
+
+                if (speechTimeout) {
+                    clearTimeout(speechTimeout);
+                    speechTimeout = null;
+                }
+            };
             } catch (error) {
                 console.error('Error initializing speech recognition:', error);
                 speechStatus.textContent = "Something went wrong. Try typing instead!";
