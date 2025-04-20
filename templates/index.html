@@ -149,73 +149,88 @@
     // Hide the settings by default and add a toggle button
     document.querySelector('.settings-controls').style.display = 'none';
     
-    // Browser compatibility check
-    if (!('webkitSpeechRecognition' in window)) {
-        console.warn('Speech recognition not supported in this browser');
-        speechStatus.textContent = 'Speech recognition not available. Just type the word!';
-        micButton.disabled = true;
-        micButton.style.opacity = '0.5';
-    } else {
-        // Initialize Speech Recognition with simplified interface for children
-        if (!recognition) {
+    // Function to initialize speech recognition
+    function initSpeechRecognition() {
+        // Reset recognition if it exists
+        if (recognition) {
             try {
-                recognition = new webkitSpeechRecognition();
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                recognition.lang = 'en-US';
+                recognition.stop();
+            } catch (e) {
+                console.log("No active recognition to stop during init");
+            }
+            recognition = null;
+        }
+        
+        // Browser compatibility check
+        if (!('webkitSpeechRecognition' in window)) {
+            console.warn('Speech recognition not supported in this browser');
+            speechStatus.textContent = 'Speech recognition not available. Just type the word!';
+            micButton.disabled = true;
+            micButton.style.opacity = '0.5';
+            return false;
+        }
+        
+        try {
+            // Create a new speech recognition instance
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
 
-                console.log('Speech recognition initialized successfully');
+            console.log('Speech recognition initialized successfully');
 
-                recognition.onstart = () => {
-                    console.log('Speech recognition started');
-                    micButton.classList.add('listening');
-                    speechStatus.textContent = 'I\'m listening! Say the word...';
-                    micButton.style.transform = 'scale(1.1)';
-                    
-                    // Create some visual effects when listening
-                    createParticles(
-                        micButton.getBoundingClientRect().left + micButton.getBoundingClientRect().width/2,
-                        micButton.getBoundingClientRect().top + micButton.getBoundingClientRect().height/2,
-                        'mic'
-                    );
+            // Set up event handlers
+            recognition.onstart = () => {
+                console.log('Speech recognition started');
+                micButton.classList.add('listening');
+                speechStatus.textContent = 'I\'m listening! Say the word...';
+                micButton.style.transform = 'scale(1.1)';
+                
+                // Create some visual effects when listening
+                createParticles(
+                    micButton.getBoundingClientRect().left + micButton.getBoundingClientRect().width/2,
+                    micButton.getBoundingClientRect().top + micButton.getBoundingClientRect().height/2,
+                    'mic'
+                );
 
-                    // Add timeout after 5 seconds of no speech
-                    speechTimeout = setTimeout(() => {
-                        if (micButton.classList.contains('listening')) {
-                            recognition.stop();
-                            speechStatus.textContent = 'Try again! Press the mic button 🎤';
-                        }
-                    }, 5000);
-                };
-
-                recognition.onend = () => {
-                    console.log('Speech recognition ended');
-                    micButton.classList.remove('listening');
-                    speechStatus.textContent = 'Press the mic button 🎤 to say the word!';
-                    micButton.style.transform = 'scale(1)';
-                    if (speechTimeout) {
-                        clearTimeout(speechTimeout);
-                        speechTimeout = null;
+                // Add timeout after 5 seconds of no speech
+                speechTimeout = setTimeout(() => {
+                    if (micButton.classList.contains('listening')) {
+                        recognition.stop();
+                        speechStatus.textContent = 'Try again! Press the mic button 🎤';
                     }
-                };
+                }, 5000);
+            };
 
-                recognition.onresult = (event) => {
-                    if (speechTimeout) {
-                        clearTimeout(speechTimeout);
-                        speechTimeout = null;
-                    }
-                    const transcript = event.results[0][0].transcript.toLowerCase().trim();
-                    const confidence = event.results[0][0].confidence;
+            recognition.onend = () => {
+                console.log('Speech recognition ended');
+                micButton.classList.remove('listening');
+                micButton.classList.remove('auto-listening');
+                speechStatus.textContent = 'Press the mic button 🎤 to say the word!';
+                micButton.style.transform = 'scale(1)';
+                if (speechTimeout) {
+                    clearTimeout(speechTimeout);
+                    speechTimeout = null;
+                }
+            };
 
-                    console.log('Speech recognized:', transcript, 'Confidence:', confidence);
+            recognition.onresult = (event) => {
+                if (speechTimeout) {
+                    clearTimeout(speechTimeout);
+                    speechTimeout = null;
+                }
+                const transcript = event.results[0][0].transcript.toLowerCase().trim();
+                const confidence = event.results[0][0].confidence;
 
-                    // Update input field immediately
-                    readingInput.value = transcript;
+                console.log('Speech recognized:', transcript, 'Confidence:', confidence);
 
-                    // Clean up both the transcript and current word for comparison
-                    // For young children, be EXTREMELY lenient with matching
-                    const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
-                    const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                // Update input field immediately
+                readingInput.value = transcript;
+
+                // Clean up both the transcript and current word for comparison
+                // For young children, be EXTREMELY lenient with matching
+                const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
                     
                     console.log('Comparing:', cleanTranscript, 'with target word:', cleanCurrentWord);
                     
@@ -586,27 +601,32 @@
             setTimeout(() => {
                 spellOutWord();
                 
-                // Automatically activate microphone after spelling out the word
-                // This makes it seamless for children - they don't have to click the mic
+                // Instead of automatic microphone activation, 
+                // just prompt the child to press the mic button
+                // This is more reliable across browsers
                 setTimeout(() => {
-                    if (recognition) {
-                        // Visual cue that we're getting ready to listen
-                        micButton.classList.add('auto-listening');
-                        micButton.style.transform = 'scale(1.1)';
-                        
-                        // Create visual effects to draw attention to the mic
-                        createParticles(
-                            micButton.getBoundingClientRect().left + micButton.getBoundingClientRect().width/2,
-                            micButton.getBoundingClientRect().top + micButton.getBoundingClientRect().height/2,
-                            'mic'
-                        );
-                        
-                        // Then start listening
+                    // Visual cue to press the mic button
+                    micButton.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        micButton.style.transform = 'scale(1)';
                         setTimeout(() => {
-                            speechStatus.textContent = "I'm listening! Say the word...";
-                            recognition.start();
-                        }, 1000);
-                    }
+                            micButton.style.transform = 'scale(1.1)';
+                            setTimeout(() => {
+                                micButton.style.transform = 'scale(1)';
+                            }, 300);
+                        }, 300);
+                    }, 300);
+                    
+                    // Create visual effects to draw attention to the mic
+                    createParticles(
+                        micButton.getBoundingClientRect().left + micButton.getBoundingClientRect().width/2,
+                        micButton.getBoundingClientRect().top + micButton.getBoundingClientRect().height/2,
+                        'mic'
+                    );
+                    
+                    // Clear instruction for child
+                    speechStatus.textContent = "Press the mic 🎤 button and say the word!";
+                    speakWord("Now press the microphone button and say the word!");
                 }, 3000); // Wait 3 seconds after spelling out the word
             }, 1000);
         }, 1000);
@@ -696,17 +716,58 @@
     micButton.addEventListener('click', () => {
         console.log('Mic button clicked');
         if (recognition) {
-            // Check if recognition is already active
-            if (micButton.classList.contains('listening') || micButton.classList.contains('auto-listening')) {
-                console.log('Recognition already active, stopping first');
+            // First, remove any auto-listening classes
+            micButton.classList.remove('auto-listening');
+            
+            // Always stop any existing recognition to ensure clean state
+            try {
                 recognition.stop();
-                // Wait a moment before restarting
-                setTimeout(() => {
-                    recognition.start();
-                }, 300);
-            } else {
-                recognition.start();
+                console.log('Stopped existing recognition');
+            } catch (e) {
+                // Handle case where recognition wasn't running
+                console.log('No active recognition to stop');
             }
+            
+            // Clear speech timeout if it exists
+            if (speechTimeout) {
+                clearTimeout(speechTimeout);
+                speechTimeout = null;
+            }
+            
+            // Wait a moment before starting new recognition
+            setTimeout(() => {
+                try {
+                    // Apply visual feedback that we're listening
+                    micButton.classList.add('listening');
+                    speechStatus.textContent = "I'm listening! Say the word...";
+                    
+                    // Create visual effects to draw attention
+                    createParticles(
+                        micButton.getBoundingClientRect().left + micButton.getBoundingClientRect().width/2,
+                        micButton.getBoundingClientRect().top + micButton.getBoundingClientRect().height/2,
+                        'mic'
+                    );
+                    
+                    // Start recognition
+                    recognition.start();
+                    console.log('Started new recognition');
+                    
+                    // Set timeout for automatic stopping if no speech detected
+                    speechTimeout = setTimeout(() => {
+                        if (micButton.classList.contains('listening')) {
+                            recognition.stop();
+                            speechStatus.textContent = 'Try again! Press the mic button 🎤';
+                        }
+                    }, 5000);
+                } catch (e) {
+                    console.error('Error starting recognition:', e);
+                    // Try recreating the recognition object
+                    setTimeout(() => {
+                        initSpeechRecognition();
+                        micButton.click();
+                    }, 500);
+                }
+            }, 300);
         } else {
             alert('Speech recognition is not supported in your browser.');
         }
@@ -745,6 +806,9 @@
         }
     }
 
+    // Initialize speech recognition
+    initSpeechRecognition();
+    
     // Initialize first word with speech
     updateWord();
     updateProgressDisplay();
