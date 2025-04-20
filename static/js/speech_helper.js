@@ -134,13 +134,24 @@ class SpeechHelper {
         // Create some visual effects when listening
         ParticleEffects.createParticlesAroundElement(this.micButton, 'mic');
 
-        // Add timeout after 5 seconds of no speech
+        // Add timeout after 7 seconds of no speech (extended from 5 to give more time)
         this.speechTimeout = setTimeout(() => {
             if (this.micButton.classList.contains('listening')) {
-                this.stop();
-                this.statusElement.textContent = 'Try again! Press the mic button 🎤';
+                console.log('Speech recognition timed out - attempting to restart');
+                
+                // Try to restart recognition instead of just stopping
+                try {
+                    this.stop();
+                    setTimeout(() => {
+                        this.start();
+                        this.statusElement.textContent = 'Let\'s try again! Say the word clearly...';
+                    }, 1000);
+                } catch (e) {
+                    console.error('Error restarting speech recognition:', e);
+                    this.statusElement.textContent = 'Try again! Press the mic button 🎤';
+                }
             }
-        }, 5000);
+        }, 7000);
     }
     
     /**
@@ -187,25 +198,28 @@ class SpeechHelper {
         
         // Simplified error messages for children based on error type
         let message = "I couldn't hear you. Try again!";
+        let shouldRetry = false;
         
         // Handle specific error types with child-friendly messages
         switch (event.error) {
             case 'network':
                 message = "I can't hear you right now. Please try again!";
-                // Try to reinitialize after a short delay
-                setTimeout(() => this.initialize(), 2000);
+                // Network errors often require a retry
+                shouldRetry = true;
                 break;
             case 'not-allowed':
                 message = "I need permission to listen! Please allow your microphone.";
                 break;
             case 'aborted':
                 message = "Let's try again! Press the mic button.";
+                shouldRetry = true;
                 break;
             case 'audio-capture':
                 message = "I can't find your microphone. Is it connected?";
                 break;
             case 'no-speech':
                 message = "I didn't hear anything. Please speak a little louder!";
+                shouldRetry = true;
                 break;
         }
         
@@ -215,6 +229,35 @@ class SpeechHelper {
         if (this.speechTimeout) {
             clearTimeout(this.speechTimeout);
             this.speechTimeout = null;
+        }
+        
+        // For certain error types, we automatically retry after a short delay
+        if (shouldRetry) {
+            console.log(`Automatically retrying after ${event.error} error`);
+            setTimeout(() => {
+                try {
+                    // First try to reinitialize the recognition
+                    this.initialize();
+                    
+                    // Then try to start listening again
+                    setTimeout(() => {
+                        this.start();
+                        this.statusElement.textContent = 'Trying again! Say the word...';
+                    }, 1000);
+                } catch (e) {
+                    console.error('Error during automatic retry:', e);
+                    // If retry fails, suggest typing instead
+                    this.statusElement.textContent = "Let's type instead! Type the word.";
+                    
+                    // Try to focus the input field
+                    setTimeout(() => {
+                        const inputs = document.querySelectorAll('input[type="text"]');
+                        if (inputs.length > 0) {
+                            inputs[0].focus();
+                        }
+                    }, 1000);
+                }
+            }, 2000);
         }
     }
 }
