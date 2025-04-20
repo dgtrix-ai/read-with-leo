@@ -41,13 +41,20 @@ class WordBank {
         // Check for review words first
         const reviewWord = this.progressTracker.getNextWord(this);
         if (reviewWord) {
+            // Mark that this is a review word
+            this.isCurrentWordReview = true;
             return reviewWord;
         }
 
         // Get words from current difficulty and category
+        this.isCurrentWordReview = false;
         const difficulty = this.progressTracker.getCurrentLevel();
         const categoryWords = this.categories[this.currentCategory][difficulty];
         return categoryWords[Math.floor(Math.random() * categoryWords.length)];
+    }
+    
+    isReviewWord() {
+        return this.isCurrentWordReview;
     }
 
     recordAttempt(word, isCorrect) {

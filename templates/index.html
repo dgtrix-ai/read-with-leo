@@ -68,6 +68,10 @@
 
         <!-- The word to spell - large display -->
         <div class="word-display">Ready to start!</div>
+        <div class="review-word-indicator" style="display: none;">
+            <span class="review-star">⭐</span>
+            <span class="review-text">Practice Word</span>
+        </div>
         
         <!-- Speech controls - simplified -->
         <div class="speech-container">
@@ -377,7 +381,8 @@
             'play': ['🎾', '⚡', '🌟'],
             'treat': ['🦴', '❤️', '🍖'],
             'mic': ['🎤', '🔊', '👂', '🗣️'],
-            'correct': ['🎉', '⭐', '🌟', '👏', '🎊']
+            'correct': ['🎉', '⭐', '🌟', '👏', '🎊'],
+            'reviewStar': ['⭐', '✨', '💫', '🌠']
         };
         
         const emojis = particles[type] || particles.pet;
@@ -552,6 +557,28 @@
         readingInput.value = '';
         rewardContainer.style.display = 'none';
         interactionItems.style.display = 'none';
+        
+        // Hide review word indicator by default
+        document.querySelector('.review-word-indicator').style.display = 'none';
+        
+        // Check if this is a review word and show indicator if it is
+        if (wordBank.isReviewWord()) {
+            setTimeout(() => {
+                document.querySelector('.review-word-indicator').style.display = 'flex';
+                
+                // Create sparkle effects around the review star
+                const indicator = document.querySelector('.review-word-indicator');
+                const rect = indicator.getBoundingClientRect();
+                createParticles(
+                    rect.left + rect.width/2,
+                    rect.top + rect.height/2,
+                    'reviewStar'
+                );
+                
+                // Special message for review words to encourage practice
+                speakWord("This is a special practice word! Let's try it again!");
+            }, 500);
+        }
         
         wordDisplay.textContent = 'Get ready...';
         setTimeout(() => {
