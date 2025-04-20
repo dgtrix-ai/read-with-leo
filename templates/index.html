@@ -4,6 +4,18 @@
     <title>Learn with Leo the Puppy! 🐕📚</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Core functionality scripts -->
+    <script src="/static/js/learning_path.js"></script>
+    <script src="/static/js/progress_tracker.js"></script>
+    <script src="/static/js/word_bank.js"></script>
+    <script src="/static/js/video-generator.js"></script>
+    
+    <!-- Utility scripts for better code organization -->
+    <script src="/static/js/word_matcher.js"></script>
+    <script src="/static/js/particle_effects.js"></script>
+    <script src="/static/js/speech_helper.js"></script>
+    <script src="/static/js/reward_manager.js"></script>
 </head>
 <body>
     <h1>Learn with Leo! 🐕✨</h1>
@@ -117,11 +129,6 @@
         </div>
     </div>
 
-    <script src="/static/js/learning_path.js"></script>
-    <script src="/static/js/video-generator.js"></script>
-    <script src="/static/js/progress_tracker.js"></script>
-    <script src="/static/js/word_bank.js"></script>
-    
     <script>
     // DOM Element declarations
     const puppy = document.querySelector('.puppy-image');
@@ -149,235 +156,81 @@
     // Hide the settings by default and add a toggle button
     document.querySelector('.settings-controls').style.display = 'none';
     
-    // Function to initialize speech recognition
+    // Function to initialize speech recognition using our utility class
     function initSpeechRecognition() {
-        // Reset recognition if it exists
-        if (recognition) {
-            try {
-                recognition.stop();
-            } catch (e) {
-                console.log("No active recognition to stop during init");
-            }
-            recognition = null;
-        }
+        // Create a speech helper instance
+        speechHelper = new SpeechHelper({
+            micButton: micButton,
+            statusElement: speechStatus,
+            onResult: handleSpeechResult
+        });
         
-        // Browser compatibility check for both standard and webkit versions
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            console.warn('Speech recognition not supported in this browser');
-            speechStatus.textContent = 'Speech recognition not available. Just type the word!';
-            micButton.disabled = true;
-            micButton.style.opacity = '0.5';
-            return false;
-        }
+        // The recognition object is managed by the helper
+        recognition = speechHelper.recognition;
+        return !!recognition;
+    }
+    
+    // Handle speech recognition results
+    function handleSpeechResult(transcript, confidence) {
+        // Update input field immediately
+        readingInput.value = transcript;
         
-        try {
-            // Create a new speech recognition instance
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-
-            console.log('Speech recognition initialized successfully');
-
-            // Set up event handlers
-            recognition.onstart = () => {
-                console.log('Speech recognition started');
-                micButton.classList.add('listening');
-                speechStatus.textContent = 'I\'m listening! Say the word...';
-                micButton.style.transform = 'scale(1.1)';
-                
-                // Create some visual effects when listening
-                createParticles(
-                    micButton.getBoundingClientRect().left + micButton.getBoundingClientRect().width/2,
-                    micButton.getBoundingClientRect().top + micButton.getBoundingClientRect().height/2,
-                    'mic'
-                );
-
-                // Add timeout after 5 seconds of no speech
-                speechTimeout = setTimeout(() => {
-                    if (micButton.classList.contains('listening')) {
-                        recognition.stop();
-                        speechStatus.textContent = 'Try again! Press the mic button 🎤';
-                    }
-                }, 5000);
-            };
-
-            recognition.onend = () => {
-                console.log('Speech recognition ended');
-                micButton.classList.remove('listening');
-                micButton.classList.remove('auto-listening');
-                speechStatus.textContent = 'Press the mic button 🎤 to say the word!';
-                micButton.style.transform = 'scale(1)';
-                if (speechTimeout) {
-                    clearTimeout(speechTimeout);
-                    speechTimeout = null;
-                }
-            };
-
-            recognition.onresult = (event) => {
-                if (speechTimeout) {
-                    clearTimeout(speechTimeout);
-                    speechTimeout = null;
-                }
-                const transcript = event.results[0][0].transcript.toLowerCase().trim();
-                const confidence = event.results[0][0].confidence;
-
-                console.log('Speech recognized:', transcript, 'Confidence:', confidence);
-
-                // Update input field immediately
-                readingInput.value = transcript;
-
-                // Clean up both the transcript and current word for comparison
-                // For young children, be EXTREMELY lenient with matching
-                const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
-                const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
-                
-                console.log('Comparing:', cleanTranscript, 'with target word:', cleanCurrentWord);
-                
-                // Use a VERY forgiving matching algorithm designed specifically for children
-                // 1. Exact match
-                // 2. If the transcript contains the word (e.g., "a duck" for "duck")
-                // 3. If the transcript is contained in the word (e.g., "do" for "dog")
-                // 4. If the first letter matches and was spoken clearly (for very short words)
-                // 5. Using Levenshtein distance to allow for child pronunciation errors
-                
-                const exactMatch = cleanTranscript === cleanCurrentWord;
-                const containsMatch = cleanTranscript.includes(cleanCurrentWord);
-                const reverseContainsMatch = cleanCurrentWord.includes(cleanTranscript) && cleanTranscript.length > 1;
-                const firstLetterMatch = cleanCurrentWord.length <= 3 && cleanTranscript.charAt(0) === cleanCurrentWord.charAt(0);
-                
-                // Calculate letter matching percentage for more forgiving comparison
-                let matchCount = 0;
-                const minLength = Math.min(cleanTranscript.length, cleanCurrentWord.length);
-                for (let i = 0; i < minLength; i++) {
-                    if (cleanTranscript.charAt(i) === cleanCurrentWord.charAt(i)) {
-                        matchCount++;
-                    }
-                }
-                const percentMatch = minLength > 0 ? matchCount / minLength : 0;
-                const goodEnoughMatch = percentMatch >= 0.5 && minLength > 1;
-                
-                console.log('Match details:', {
-                    exactMatch, 
-                    containsMatch, 
-                    reverseContainsMatch, 
-                    firstLetterMatch, 
-                    percentMatch, 
-                    goodEnoughMatch
-                });
-                
-                const isMatch = exactMatch || containsMatch || reverseContainsMatch || firstLetterMatch || goodEnoughMatch;
-
-                if (isMatch) {
-                    wordBank.recordAttempt(currentWord, true);
-                    updateProgressDisplay();
-                    
-                    // Show large, exciting success feedback with animation
-                    wordDisplay.innerHTML = '🌟 <span class="success-text">Correct!</span> 🌟';
-                    wordDisplay.style.color = '#FFDE00';
-                    
-                    // Immediately display reward options
-                    rewardContainer.style.display = 'block';
-                    interactionItems.style.display = 'flex';
-                    
-                    // Congratulate the child with enthusiastic voice
-                    speakWord("Fantastic! You did it! Choose your reward!");
-
-                    // Create large celebration effects around the puppy
-                    createParticles(
-                        puppy.getBoundingClientRect().left + puppy.getBoundingClientRect().width/2,
-                        puppy.getBoundingClientRect().top + puppy.getBoundingClientRect().height/2,
-                        'correct'
-                    );
-                    
-                    // Animate the puppy with excitement
-                    puppy.classList.add('happy-bounce');
-                    setTimeout(() => {
-                        puppy.classList.remove('happy-bounce');
-                    }, 1500);
-                    
-                    // Simple encouraging feedback for children
-                    speechStatus.textContent = `Amazing job! You're so smart! 🎉`;
-                    
-                    // Pulse effect on reward options to draw attention
-                    interactionItems.querySelectorAll('.interaction-item').forEach(item => {
-                        item.classList.add('reward-attention');
-                        setTimeout(() => {
-                            item.classList.remove('reward-attention');
-                        }, 2000);
-                    });
-                } else {
-                    wordBank.recordAttempt(currentWord, false);
-                    updateProgressDisplay();
-                    
-                    // For children, don't emphasize "incorrect" too much
-                    // We want them to feel encouraged to try again
-                    
-                    // Calculate how close they were to encourage improvement
-                    let encouragementMessage = '';
-                    if (percentMatch >= 0.3) {
-                        // They were pretty close
-                        encouragementMessage = `You're so close! The word is ${currentWord}.`;
-                        wordDisplay.textContent = '💪 Almost there!';
-                    } else {
-                        // They need more guidance
-                        encouragementMessage = `Let's try again! The word is ${currentWord}.`;
-                        wordDisplay.textContent = '🔊 Listen one more time!';
-                    }
-                    
-                    wordDisplay.style.color = '#ffffff';
-                    
-                    // Hide reward options
-                    rewardContainer.style.display = 'none';
-                    interactionItems.style.display = 'none';
-                    
-                    // Provide VERY encouraging feedback with the correct word
-                    speakWord(encouragementMessage);
-                    
-                    // Gentle visual feedback - puppy is supportive
-                    puppy.classList.add('encouraging-wiggle');
-                    setTimeout(() => {
-                        puppy.classList.remove('encouraging-wiggle');
-                        // Spell out the word again automatically after a delay
-                        setTimeout(() => {
-                            spellOutWord();
-                            
-                            // Automatically activate the mic again after spelling out
-                            setTimeout(() => {
-                                if (recognition) {
-                                    recognition.start();
-                                }
-                            }, 4000); // Wait after spelling completes
-                            
-                        }, 1000);
-                    }, 1500);
-
-                    // Simple supportive feedback for children
-                    speechStatus.textContent = `Good try! You can do it! 💪`;
-                }
-            };
-
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                
-                // Simplified error messages for children
-                speechStatus.textContent = "I couldn't hear you. Try again!";
-                micButton.classList.remove('listening');
-
-                if (speechTimeout) {
-                    clearTimeout(speechTimeout);
-                    speechTimeout = null;
-                }
-            };
+        // Use our WordMatcher utility to compare the spoken word with the target
+        const result = WordMatcher.compareWords(transcript, currentWord);
+        console.log('Comparing:', transcript, 'with target word:', currentWord);
+        console.log('Match details:', result.matchDetails);
+        
+        if (result.isMatch) {
+            wordBank.recordAttempt(currentWord, true);
+            updateProgressDisplay();
             
-            return true; // Successfully initialized
+            // Create and configure a reward manager
+            const rewardManager = new RewardManager({
+                puppy: puppy,
+                wordDisplay: wordDisplay,
+                rewardContainer: rewardContainer,
+                interactionItems: interactionItems,
+                speechStatus: speechStatus
+            });
             
-        } catch (error) {
-            console.error('Error initializing speech recognition:', error);
-            speechStatus.textContent = "Something went wrong. Try typing instead!";
-            micButton.disabled = true;
-            return false;
+            // Show success reward
+            rewardManager.showSuccessReward({
+                message: '🌟 <span class="success-text">Correct!</span> 🌟'
+            });
+            
+        } else {
+            wordBank.recordAttempt(currentWord, false);
+            updateProgressDisplay();
+            
+            // Create reward manager for incorrect feedback
+            const rewardManager = new RewardManager({
+                puppy: puppy,
+                wordDisplay: wordDisplay,
+                rewardContainer: rewardContainer,
+                interactionItems: interactionItems,
+                speechStatus: speechStatus
+            });
+            
+            // Show feedback for incorrect answer
+            rewardManager.showIncorrectFeedback({
+                correctWord: currentWord,
+                percentMatch: result.matchDetails.percentMatch
+            }).then(() => {
+                // Spell out the word again automatically after a delay
+                setTimeout(() => {
+                    spellOutWord();
+                    
+                    // Automatically activate the mic again after spelling out
+                    setTimeout(() => {
+                        if (speechHelper) {
+                            speechHelper.start();
+                        }
+                    }, 4000); // Wait after spelling completes
+                }, 1000);
+            });
+            
+            // Simple supportive feedback for children
+            speechStatus.textContent = `Good try! You can do it! 💪`;
         }
     }
 
@@ -394,47 +247,10 @@
         energyValue.textContent = `${Math.round(energy)}%`;
     }
 
+    // Using our ParticleEffects utility class to reduce code duplication
     function createParticles(x, y, type) {
-        const particles = {
-            'pet': ['💖', '✨', '💫'],
-            'play': ['🎾', '⚡', '🌟'],
-            'treat': ['🦴', '❤️', '🍖'],
-            'mic': ['🎤', '🔊', '👂', '🗣️'],
-            'correct': ['🎉', '⭐', '🌟', '👏', '🎊'],
-            'reviewStar': ['⭐', '✨', '💫', '🌠']
-        };
-        
-        const emojis = particles[type] || particles.pet;
-        const count = type === 'correct' ? 12 : 6;
-        
-        for (let i = 0; i < count; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-            
-            // Different behavior for different particle types
-            if (type === 'mic') {
-                // Mic particles move in a circular pattern
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 30 + Math.random() * 20;
-                particle.style.left = `${x + Math.cos(angle) * distance}px`;
-                particle.style.top = `${y + Math.sin(angle) * distance}px`;
-                particle.style.fontSize = '1.2rem';
-            } else if (type === 'correct') {
-                // Celebration particles cover more area
-                particle.style.left = `${x + (Math.random() - 0.5) * 200}px`;
-                particle.style.top = `${y + (Math.random() - 0.5) * 200}px`;
-                particle.style.fontSize = '1.8rem';
-            } else {
-                // Standard particles
-                particle.style.left = `${x + (Math.random() - 0.5) * 100}px`;
-                particle.style.top = `${y + (Math.random() - 0.5) * 100}px`;
-                particle.style.fontSize = '1.5rem';
-            }
-            
-            document.body.appendChild(particle);
-            setTimeout(() => particle.remove(), 1500);
-        }
+        // Call the utility class method
+        ParticleEffects.createParticles(x, y, type);
     }
 
     function interactWithLeo(e) {
@@ -797,18 +613,8 @@
     });
 
     // Speech Synthesis Setup
-    const speechSynthesis = window.speechSynthesis;
-
-    function speakWord(word) {
-        if (speechSynthesis) {
-            speechSynthesis.cancel();
-            
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.rate = 0.8;
-            utterance.pitch = 1;
-            speechSynthesis.speak(utterance);
-        }
-    }
+    // Using our speech utility for text-to-speech functionality
+    let speechHelper;
 
     // Initialize speech recognition
     initSpeechRecognition();
