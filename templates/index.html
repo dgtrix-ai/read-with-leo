@@ -401,14 +401,9 @@
             setTimeout(() => {
                 document.querySelector('.review-word-indicator').style.display = 'flex';
                 
-                // Create sparkle effects around the review star
+                // Create sparkle effects around the review star using our ParticleEffects utility
                 const indicator = document.querySelector('.review-word-indicator');
-                const rect = indicator.getBoundingClientRect();
-                createParticles(
-                    rect.left + rect.width/2,
-                    rect.top + rect.height/2,
-                    'reviewStar'
-                );
+                ParticleEffects.createParticlesAroundElement(indicator, 'reviewStar');
                 
                 // Special message for review words to encourage practice
                 speakWord("This is a special practice word! Let's try it again!");
@@ -438,11 +433,7 @@
                     }, 300);
                     
                     // Create visual effects to draw attention to the mic
-                    createParticles(
-                        micButton.getBoundingClientRect().left + micButton.getBoundingClientRect().width/2,
-                        micButton.getBoundingClientRect().top + micButton.getBoundingClientRect().height/2,
-                        'mic'
-                    );
+                    ParticleEffects.createParticlesAroundElement(micButton, 'mic');
                     
                     // Clear instruction for child
                     speechStatus.textContent = "Press the mic 🎤 button and say the word!";
@@ -477,11 +468,8 @@
             interactionItems.style.display = 'flex';
             speakWord("Great job! Choose your reward!");
             
-            createParticles(
-                puppy.getBoundingClientRect().left + puppy.getBoundingClientRect().width/2,
-                puppy.getBoundingClientRect().top + puppy.getBoundingClientRect().height/2,
-                'pet'
-            );
+            // Create celebration particles around the puppy
+            ParticleEffects.createParticlesAroundElement(puppy, 'pet');
             
         } else if (readingInput.value.length >= currentWord.length) {
             wordDisplay.textContent = '❌ Try again!';
