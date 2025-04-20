@@ -180,18 +180,18 @@
         console.log('Comparing:', transcript, 'with target word:', currentWord);
         console.log('Match details:', result.matchDetails);
         
+        // Create a single reward manager instance that can be used for both outcomes
+        const rewardManager = new RewardManager({
+            puppy: puppy,
+            wordDisplay: wordDisplay,
+            rewardContainer: rewardContainer,
+            interactionItems: interactionItems,
+            speechStatus: speechStatus
+        });
+        
         if (result.isMatch) {
             wordBank.recordAttempt(currentWord, true);
             updateProgressDisplay();
-            
-            // Create and configure a reward manager
-            const rewardManager = new RewardManager({
-                puppy: puppy,
-                wordDisplay: wordDisplay,
-                rewardContainer: rewardContainer,
-                interactionItems: interactionItems,
-                speechStatus: speechStatus
-            });
             
             // Show success reward
             rewardManager.showSuccessReward({
@@ -201,15 +201,6 @@
         } else {
             wordBank.recordAttempt(currentWord, false);
             updateProgressDisplay();
-            
-            // Create reward manager for incorrect feedback
-            const rewardManager = new RewardManager({
-                puppy: puppy,
-                wordDisplay: wordDisplay,
-                rewardContainer: rewardContainer,
-                interactionItems: interactionItems,
-                speechStatus: speechStatus
-            });
             
             // Show feedback for incorrect answer
             rewardManager.showIncorrectFeedback({
@@ -247,7 +238,8 @@
         energyValue.textContent = `${Math.round(energy)}%`;
     }
 
-    // Using our ParticleEffects utility class to reduce code duplication
+    // We no longer need this wrapper function as we're using ParticleEffects directly
+    // Keeping it for backward compatibility with any code that hasn't been updated yet
     function createParticles(x, y, type) {
         // Call the utility class method
         ParticleEffects.createParticles(x, y, type);
@@ -257,8 +249,8 @@
         const rect = puppy.getBoundingClientRect();
         const type = e.currentTarget.dataset.type;
         
-        // Create fun particles around the puppy
-        createParticles(rect.left + rect.width/2, rect.top + rect.height/2, type);
+        // Create fun particles around the puppy using our ParticleEffects utility
+        ParticleEffects.createParticlesAroundElement(puppy, type);
         
         // Hide the puppy image to show the video
         puppy.style.opacity = '0';
