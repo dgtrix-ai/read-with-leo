@@ -370,10 +370,13 @@
         const rect = puppy.getBoundingClientRect();
         const type = e.currentTarget.dataset.type;
         
+        // Create fun particles around the puppy
         createParticles(rect.left + rect.width/2, rect.top + rect.height/2, type);
         
+        // Hide the puppy image to show the video
         puppy.style.opacity = '0';
         
+        // Make sure all videos are stopped and hidden
         document.querySelectorAll('.video-container video').forEach(v => {
             v.style.opacity = '0';
             v.style.display = 'none';
@@ -381,38 +384,54 @@
             v.currentTime = 0;
         });
         
+        // Select the right video and update stats based on interaction type
         let video;
         switch(type) {
             case 'pet':
                 video = document.getElementById('petVideo');
                 happiness += 5;
                 energy += 2;
+                // Give positive feedback
+                speakWord("Leo loves pets! Good job!");
                 break;
             case 'play':
                 if (energy >= 10) {
                     video = document.getElementById('playVideo');
                     happiness += 15;
                     energy -= 10;
+                    // Give positive feedback
+                    speakWord("Yay! Leo loves playing fetch!");
+                } else {
+                    // Not enough energy - give feedback
+                    speakWord("Leo is too tired to play right now.");
                 }
                 break;
             case 'treat':
                 video = document.getElementById('treatVideo');
                 happiness += 10;
                 energy += 15;
+                // Give positive feedback
+                speakWord("Mmm! Leo loves treats!");
                 break;
         }
         
+        // Show and play the selected video with animation
         if (video) {
+            // Apply a border to the video for better visibility
             video.style.display = 'block';
+            
+            // Fade in the video
             requestAnimationFrame(() => {
                 video.style.opacity = '1';
                 video.play().catch(() => {
+                    // Fallback if video can't play
                     video.style.opacity = '0';
                     video.style.display = 'none';
                     puppy.style.opacity = '1';
                 });
             });
             
+            // When video ends, fade it out and show the puppy again
             video.onended = function() {
                 video.style.opacity = '0';
                 setTimeout(() => {
@@ -421,17 +440,26 @@
                         puppy.style.opacity = '1';
                     });
                 }, 300);
+                
+                // Give feedback when video ends
+                speakWord("Great job! Let's try another word!");
             };
         } else {
+            // If no video, just show the puppy
             requestAnimationFrame(() => {
                 puppy.style.opacity = '1';
             });
         }
         
+        // Update UI and move to next word
         updateStats();
         interactionItems.style.display = 'none';
         readingInput.value = '';
-        updateWord();
+        
+        // Small delay before next word to allow the child to enjoy the reward
+        setTimeout(() => {
+            updateWord();
+        }, 1500);
     }
 
     function getRandomWord() {
