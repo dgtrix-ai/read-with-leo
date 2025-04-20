@@ -187,10 +187,19 @@ h1 {
   transform: scale(1.1);
 }
 
-.mic-button.listening {
+.mic-button.listening, .mic-button.auto-listening {
   background: #ff0000;
   animation: pulse 1.5s infinite;
   box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+}
+
+.mic-button.auto-listening {
+  animation: pulseMic 1s infinite alternate;
+}
+
+@keyframes pulseMic {
+  0% { transform: scale(1); background-color: #ff0000; }
+  100% { transform: scale(1.2); background-color: #ff8f8f; }
 }
 
 .difficulty-btn, .category-btn {
@@ -381,4 +390,50 @@ h2 {
 .settings-toggle-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 7px 15px rgba(0,0,0,0.4);
+}
+
+/* Animation for success text */
+.success-text {
+  display: inline-block;
+  animation: success-bounce 0.5s ease infinite alternate;
+  font-size: 1.5rem;
+  text-shadow: 0 0 10px #FFFF00;
+}
+
+@keyframes success-bounce {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2); }
+}
+
+/* Puppy animations */
+.happy-bounce {
+  animation: happyBounce 0.5s ease infinite alternate;
+}
+
+@keyframes happyBounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-10px); }
+}
+
+.encouraging-wiggle {
+  animation: wiggle 0.5s ease;
+}
+
+@keyframes wiggle {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* Pulse animation for reward options */
+.reward-attention {
+  animation: pulse 0.5s ease infinite alternate;
+  box-shadow: 0 0 15px rgba(255, 255, 0, 0.7);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
 }

@@ -209,64 +209,85 @@
                     readingInput.value = transcript;
 
                     // Clean up both the transcript and current word for comparison
+                    // For young children, be very lenient with matching
                     const cleanTranscript = transcript.replace(/[^a-zA-Z]/g, '').toLowerCase();
                     const cleanCurrentWord = currentWord.replace(/[^a-zA-Z]/g, '').toLowerCase();
-
-                    // For children, be more lenient with word matching
-                    // Check if the spoken word is close enough to the correct word
-                    const isMatch = cleanTranscript === cleanCurrentWord || 
-                                  (cleanTranscript.includes(cleanCurrentWord) || 
-                                   cleanCurrentWord.includes(cleanTranscript)) &&
-                                  Math.abs(cleanTranscript.length - cleanCurrentWord.length) <= 2;
+                    
+                    // Use a more lenient matching algorithm for children
+                    // 1. Exact match
+                    // 2. If the transcript contains the word (e.g., "a duck" for "duck")
+                    // 3. If the first letters match and lengths are similar
+                    const exactMatch = cleanTranscript === cleanCurrentWord;
+                    const containsMatch = cleanTranscript.includes(cleanCurrentWord);
+                    const similarStartMatch = cleanCurrentWord.length > 2 && 
+                                           cleanTranscript.startsWith(cleanCurrentWord.substring(0, 2)) &&
+                                           Math.abs(cleanTranscript.length - cleanCurrentWord.length) <= 2;
+                    
+                    const isMatch = exactMatch || containsMatch || similarStartMatch;
 
                     if (isMatch) {
                         wordBank.recordAttempt(currentWord, true);
                         updateProgressDisplay();
                         
-                        // Show large, exciting success feedback
-                        wordDisplay.textContent = '🌟 Correct! 🌟';
+                        // Show large, exciting success feedback with animation
+                        wordDisplay.innerHTML = '🌟 <span class="success-text">Correct!</span> 🌟';
                         wordDisplay.style.color = '#FFDE00';
                         
-                        // Display reward options
+                        // Immediately display reward options
                         rewardContainer.style.display = 'block';
                         interactionItems.style.display = 'flex';
                         
-                        // Congratulate the child
-                        speakWord("Great job! Choose your reward!");
+                        // Congratulate the child with enthusiastic voice
+                        speakWord("Fantastic! You did it! Choose your reward!");
 
-                        // Create celebration effects
-                        for (let i = 0; i < 3; i++) {
-                            setTimeout(() => {
-                                createParticles(
-                                    puppy.getBoundingClientRect().left + puppy.getBoundingClientRect().width/2,
-                                    puppy.getBoundingClientRect().top + puppy.getBoundingClientRect().height/2,
-                                    'pet'
-                                );
-                            }, i * 300);
-                        }
+                        // Create large celebration effects around the puppy
+                        createParticles(
+                            puppy.getBoundingClientRect().left + puppy.getBoundingClientRect().width/2,
+                            puppy.getBoundingClientRect().top + puppy.getBoundingClientRect().height/2,
+                            'correct'
+                        );
                         
-                        // Simple feedback for children
-                        speechStatus.textContent = `Great job! You said it right!`;
+                        // Animate the puppy with excitement
+                        puppy.classList.add('happy-bounce');
+                        setTimeout(() => {
+                            puppy.classList.remove('happy-bounce');
+                        }, 1500);
+                        
+                        // Simple encouraging feedback for children
+                        speechStatus.textContent = `Amazing job! You're so smart! 🎉`;
+                        
+                        // Pulse effect on reward options to draw attention
+                        interactionItems.querySelectorAll('.interaction-item').forEach(item => {
+                            item.classList.add('reward-attention');
+                            setTimeout(() => {
+                                item.classList.remove('reward-attention');
+                            }, 2000);
+                        });
                     } else {
                         wordBank.recordAttempt(currentWord, false);
                         updateProgressDisplay();
                         
-                        // Show gentle correction
-                        wordDisplay.textContent = 'Try again!';
+                        // Show gentle correction - make it very supportive
+                        wordDisplay.textContent = '💪 Almost there!';
                         wordDisplay.style.color = '#ffffff';
                         
                         // Hide reward options
                         rewardContainer.style.display = 'none';
                         interactionItems.style.display = 'none';
                         
-                        // Encourage retry
-                        speakWord("Let's try again! Listen carefully.");
+                        // Provide encouraging feedback
+                        speakWord("That was a great try! Let's hear the word again.");
+                        
+                        // Gentle visual feedback
+                        puppy.classList.add('encouraging-wiggle');
                         setTimeout(() => {
+                            puppy.classList.remove('encouraging-wiggle');
+                            // Spell out the word again automatically after a short delay
                             spellOutWord();
                         }, 1500);
 
-                        // Simple feedback for children
-                        speechStatus.textContent = `Not quite. Listen carefully and try again!`;
+                        // Simple supportive feedback for children
+                        speechStatus.textContent = `Good try! Let's hear it one more time!`;
                     }
                 };
 
@@ -460,7 +481,32 @@
         wordDisplay.textContent = 'Get ready...';
         setTimeout(() => {
             speakWord("Here's your word:");
-            setTimeout(spellOutWord, 1000);
+            setTimeout(() => {
+                spellOutWord();
+                
+                // Automatically activate microphone after spelling out the word
+                // This makes it seamless for children - they don't have to click the mic
+                setTimeout(() => {
+                    if (recognition) {
+                        // Visual cue that we're getting ready to listen
+                        micButton.classList.add('auto-listening');
+                        micButton.style.transform = 'scale(1.1)';
+                        
+                        // Create visual effects to draw attention to the mic
+                        createParticles(
+                            micButton.getBoundingClientRect().left + micButton.getBoundingClientRect().width/2,
+                            micButton.getBoundingClientRect().top + micButton.getBoundingClientRect().height/2,
+                            'mic'
+                        );
+                        
+                        // Then start listening
+                        setTimeout(() => {
+                            speechStatus.textContent = "I'm listening! Say the word...";
+                            recognition.start();
+                        }, 1000);
+                    }
+                }, 3000); // Wait 3 seconds after spelling out the word
+            }, 1000);
         }, 1000);
     }
 
